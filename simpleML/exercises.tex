@@ -1,0 +1,229 @@
+\newpage 
+\Extrachap{Exercises}
+%\addcontentsline{toc}{chapter}{\protect\numberline{}Exercises}%
+
+\begin{newquestion}{\textbf{1}~~}
+Consider the example dataset in Example~\ref{example:tennis}, please compute the below expressions (up to 2 decimal places) \begin{itemize}
+    \item $\functionname{GainRatio}(Humidity, PlayTennis)=0.16$
+    \item $\functionname{GainRatio}(Temperature, PlayTennis)=0.03$
+    \item $\functionname{GainRatio}(Wind, PlayTennis)=0.05$
+    \item $\functionname{InfoGain}(Humidity, PlayTennis)=0.15$
+    \item $\functionname{InfoGain}(Temperature, PlayTennis)=0.03$
+    \item $\functionname{InfoGain}(Wind, PlayTennis)=0.05$
+\end{itemize} 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{2}~~}
+Consider part of the \textbf{Iris} dataset in Table~\ref{tab:irisDataset}, 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c||c|c|c|c||c|}
+    \hline
+        Index & Sepal Length & Sepal Width & Pedal Length & Pedal Width & Iris Class \\
+        \hline
+        1 & 5 & 3 & 1 & 0.5 & 0 \\ 
+        2 & 4 & 2 & 1 & 0.5 & 0 \\ 
+        3 & 4 & 3 & 1 & 0.5 & 0 \\ 
+        4 & 5 & 3 & 1 & 0.5 & 0 \\ 
+        5 & 4 & 3 & 1 & 0.5 & 0 \\ 
+        6 & 7 & 3 & 4 & 1 & 1 \\ 
+        7 & 6 & 3 & 4 & 1 & 1 \\ 
+        8 & 6 & 3 & 4 & 1 & 1 \\ 
+        9 & 4 & 2 & 3 & 1 & 1 \\ 
+        10 & 6 & 3 & 6 & 2 & 2 \\ 
+        11 & 5 & 2 & 5 & 2 & 2 \\ 
+        12 & 7 & 3 & 5 & 2 & 2 \\ 
+        13 & 5 & 2 & 5 & 2 & 2 \\ 
+        14 & 7 & 2 & 5 & 1 & 2 \\ 
+         \hline
+    \end{tabular}
+    \caption{Part of \textbf{Iris} dataset}
+    \label{tab:irisDataset}
+\end{table}
+please compute the below expressions (up to 2 decimal places) \begin{itemize}
+    \item $\functionname{GainRatio}(Sepal Length, Iris Class)=$
+    \item $\functionname{GainRatio}(Sepal Width, Iris Class)=$
+    \item $\functionname{GainRatio}(Pedal Length, Iris Class)=$
+    \item $\functionname{GainRatio}(Pedal Width, Iris Class)=$
+    \item $\functionname{InfoGain}(Sepal Length, Iris Class)=$
+    \item $\functionname{InfoGain}(Sepal Width, Iris Class)=$
+    \item $\functionname{InfoGain}(Pedal Length, Iris Class)=$
+    \item $\functionname{InfoGain}(Pedal Width, Iris Class)=$
+
+\end{itemize} 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{3}~~}
+Understand the basic idea of random forest by conducting research on the literature, and implement a random forest algorithm based on the decision tree algorithm to see if random forest performs better than decision tree on \textbf{Iris} dataset. 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{4}~~}
+Following the last newquestion, please give an adversarial attack algorithm for random forest. 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{5}~~}\label{newquestion:linearregression}
+Consider the four data samples in Example~\ref{example:linearregression} (also provided in Table~\ref{tab:footballplayers2}) 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+      $X_1$   & $X_2$ & $X_3$ & $Y$ \\
+      \hline
+      182   & 87 & 11.3 & 325 \\
+      189   & 92 & 12.3 & 344 \\
+      178   & 79 & 10.6 & 350 \\
+      183   & 90 & 12.7 & 320 \\
+      \hline
+    \end{tabular}
+    \caption{A small dataset}
+    \label{tab:footballplayers2}
+\end{table}
+and the mean square error, if we have the following two functions: 
+\begin{itemize}
+    \item $f_{\textbf{w}_1}=2X_1+1X_2+20X_3-330$
+    \item $f_{\textbf{w}_2}=X_1-2X_2+23X_3-332$
+\end{itemize}
+please newanswer the following newquestions:
+\begin{enumerate}
+    \item which model is better for linear regression?
+    \item which model is better for linear classification
+ 	   by considering 0-1 loss for $\textbf{y}^T=(0,1,1,0)$?
+ 	  \item which model is better for logistic regression for $\textbf{y}^T=(0,1,1,0)$? 
+ 	  \item According to the logistic regression of the first model, what is the prediction result of the first model on a new input $(181,92,12.4)$?
+\end{enumerate}
+\end{newquestion}
+\begin{newanswer*}
+(1) Because 
+\begin{equation}
+\begin{array}{rll}
+    f_{\textbf{w}_1}(\textbf{x}_1)-y_1 = & 2*182+1*87+20*11.3-330-325 & =  22 \\
+    f_{\textbf{w}_1}(\textbf{x}_2)-y_2 = & 2*189+1*92+20*12.3-330-344 & =  42 \\
+    f_{\textbf{w}_1}(\textbf{x}_3)-y_3 = & 2*178+1*79+20*10.6-330-350 & =  -33 \\
+    f_{\textbf{w}_1}(\textbf{x}_4)-y_4 = & 2*183+1*90+20*12.7-330-320 & =  60 \\
+    
+    f_{\textbf{w}_2}(\textbf{x}_1)-y_1 = & 182-2*87+23*11.3-332-325 & =  -389.1 \\
+    f_{\textbf{w}_2}(\textbf{x}_2)-y_2 = & 189-2*92+23*12.3-332-344 & =  -388.1 \\
+    f_{\textbf{w}_2}(\textbf{x}_3)-y_3 = & 178-2*79+23*10.6-332-350 & =  -418.2 \\
+    f_{\textbf{w}_2}(\textbf{x}_4)-y_4 = & 183-2*90+23*12.7-332-320 & =  -356.9 \\
+\end{array}
+\end{equation} the model $f_{\textbf{w}_1}$ is better for linear regression, according to the loss function (Equation~\ref{equ:linearregression2}); 
+
+(2) Because
+\begin{equation}
+\begin{array}{cc}
+    step(f_{\textbf{w}_1}(\textbf{x}_1))=1\\
+    step(f_{\textbf{w}_1}(\textbf{x}_2))=1\\
+    step(f_{\textbf{w}_1}(\textbf{x}_3))=1\\
+    step(f_{\textbf{w}_1}(\textbf{x}_4))=1\\
+    step(f_{\textbf{w}_2}(\textbf{x}_1))=0\\
+    step(f_{\textbf{w}_2}(\textbf{x}_2))=0\\
+    step(f_{\textbf{w}_2}(\textbf{x}_3))=0\\
+    step(f_{\textbf{w}_2}(\textbf{x}_4))=0\\
+\end{array}
+\end{equation}
+we have that both models are the same, according to the loss function (Equation~\ref{equ:linearclassification2}); 
+
+(3) Because 
+\begin{equation}
+\begin{array}{rcl}
+    y_1*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_1)))+(1-y_1)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_1))))&=&-M\\
+    y_2*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_2)))+(1-y_2)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_2))))&=&0\\
+    y_3*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_3)))+(1-y_3)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_3))))&=&0\\
+    y_4*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_4)))+(1-y_4)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_4))))&=&-M\\
+    
+    y_1*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_1)))+(1-y_1)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_1))))&=&0\\
+    y_2*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_2)))+(1-y_2)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_2))))&=&-44.1\\
+    y_3*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_3)))+(1-y_3)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_3))))&=&-68.2\\
+    y_4*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_4)))+(1-y_4)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_4))))&=&-1.1\\
+\end{array}
+\end{equation}
+where $M$ represents a large number, so we have  
+\begin{equation}
+\begin{array}{c}
+\hat{L}(f_{\textbf{w}_1}) = -\frac{1}{4}(-M+0+0-M)=M/2\\
+\hat{L}(f_{\textbf{w}_2}) = -\frac{1}{4}(0-44.1-68.2-1.1)=28.35
+\end{array}
+\end{equation}
+according to Equation (\ref{equ:logisticregression3}). 
+Therefore, $f_{\textbf{w}_2}$ is better. 
+
+(4) According to Equation (\ref{equ:logisticregression2}), we have 
+\begin{equation}
+\begin{array}{c}
+     P_{\textbf{w}_1}(y=1|\textbf{x})=\sigma(2*181+1*92+20*12.4-330)=1 \\
+     P_{\textbf{w}_1}(y=0|\textbf{x})=1-\sigma(2*181+1*92+20*12.4-330)=0
+\end{array}
+\end{equation}
+Therefore, it is predicted to 1. 
+\end{newanswer*}
+
+\begin{newquestion}{\textbf{6}~~}
+Understand the basic idea of Bayesian linear regression by conducting research on the literature, and implement a Bayesian linear regression algorithm to compare its performance with linear regression. 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{7}~~}
+Write a program for the adversarial attack for logistic regression. 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{8}~~}
+Given a function $f(x)= e^x/(1+e^x)$, how many critical points? 
+\end{newquestion}
+\begin{newanswer*}
+0
+\end{newanswer*}
+
+\begin{newquestion}{\textbf{9}~~}
+Given a function $f(x_1,x_2)= 9x_1^2+3x_2+4$, how many critical points? 
+\end{newquestion}
+\begin{newanswer*}
+0, because there is no assignment to $x_1$ and $x_2$ that can make the gradient of $f(x_1,x_2)$ equal to $0$. 
+\end{newanswer*}
+
+\begin{newquestion}{\textbf{10}~~}
+Consider the dataset in Table~\ref{tab:workhours}, 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+       Gender  & HrsWorked & Wealthy? \\
+       \hline
+       F  & 39 & Y \\
+       F  & 45 & N \\
+       M  & 35 & N \\
+       M  & 43 & N \\
+       F  & 32 & Y \\
+       F  & 47 & Y \\
+       M  & 34 & Y \\
+       \hline
+    \end{tabular}
+    \caption{A small dataset}
+    \label{tab:workhours}
+\end{table}
+please newanswer the following newquestion:
+\begin{itemize}
+    \item $P(Wealthy=Y) = 4/7 $
+    \item $P(Wealthy=N)= 3/7 $
+    \item $P(Gender=F | Wealthy = Y) = 3/4$
+    \item $P(Gender=M | Wealthy = Y) = 1/4 $
+    \item $P(HrsWorked > 40.5 | Wealthy = Y) = 1/4$
+    \item $P(HrsWorked < 40.5 | Wealthy = Y) = 3/4$
+    \item $P(Gender=F | Wealthy = N) = 1/3$
+    \item $P(Gender=M | Wealthy = N) = 2/3 $
+    \item $P(HrsWorked > 40.5 | Wealthy = N) = 2/3$
+    \item $P(HrsWorked < 40.5 | Wealthy = N) =1/3$
+\end{itemize}
+Based on the above, please use 
+Classify a new instance with Naive Bayes algorithm (Gender = F,  HrsWorked = 44). 
+\end{newquestion}
+\begin{newanswer*}
+Because 
+\begin{equation}
+\begin{array}{l}
+    P(Wealthy=Y)*P(Gender=F | Wealthy = Y)*\\
+    P(HrsWorked > 40.5 | Wealthy = Y) =  3/28\\
+     P(Wealthy=N)*P(Gender=F | Wealthy = N)*\\
+     P(HrsWorked > 40.5 | Wealthy = n) =   2/21\\   
+\end{array}
+\end{equation}
+we have that it will be predicted as $Wealthy=Y$ according to Equation (\ref{equ:nbes}).
+\end{newanswer*}

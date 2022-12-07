@@ -1,0 +1,33 @@
+\section{Adequacy of Verification and Validation}
+
+This section discusses when a verification and testing technique is able to conclude the sufficiency, or completeness, of the analysis. For example, when using testing method, we need to know when to terminate the test case generation process. When applying robustness verification, we need to know how many local instances we need to verify. We remark that, the discussion in this section is mainly concerned with the high-level safety assurance, considering the operational use of a machine learning model that may have a set of different inputs from a data distribution $\mathcal{D}_{op}$ (see similarly in Section~\ref{sec:assuranceCNN}). It is different from the robustness verification, in which as discussed in \cite{HUANG2020100270} and Part~\ref{chap:verification} the completeness is mainly concerned about the exhaustiveness of the input instances in a small neighbourhood around a given input instance. 
+
+There are mainly two approaches that can be utilised, including the behaviours of a machine learning model in inference stage and the data instances that might appear in operational stage, respectively. For these approaches, objective metrics are needed to determine the extent to which an analysis technique has conducted, as discussed in the later ALARP principle.   
+
+\subsection*{Coverage of Machine Learning Behaviours}
+
+While usually treated as ``black-box'', most machine learning models have internal behaviours when processing a data instance. It has been noted in \cite{9451178} that, even for the complex recurrent neural networks, two input instances with the same internal behaviours, defined as the temporal evolutions of the joint latent representation of all gates and internal states, will represent the same instance and get the same classification result. For convolutional neural networks, the internal behaviours can be the vectors of latent representations of different layers. Therefore, the exploration of all internal behaviours will be adequate for the verification and testing. However, due to the continuous nature, the number of behaviours can be infinite, which suggests that some level of abstractions are usually needed to define behaviours. 
+
+
+The abstracted behaviours include low-level ones, such as the activation of individual ReLU neurons and the activation of causality relation between neurons, and high-level ones, such as the semantics relations between activation vectors of different layers. The low-level ones have led to the proposals of various structural coverage metrics, such as neuron coverage and MC/DC coverage as we discussed in Section~\ref{sec:test-criteria}, while the high-level ones have led to other proposals, such as the semantics abstraction of the neural networks as in Chapter~\ref{chap:NNabstraction} and the symbolic representation of the temporal evolution of the latent representations as in \cite{9451178}. For the latter, once a semantics representation is defined, the metric is to measure the percentage of possible concrete semantics instances that have been explored for the verification and testing. 
+
+We remark that, for both low-level and high-level behaviours, their metrics might not be able to reach 100\% coverage, because some behaviours can be infeasible for the machine learning model. Therefore, instead of setting up threshold for the termination of analysis, empirical methods, such as a similar technique as the learning curve as discussed in Section~\ref{sec:trainingsufficiency}, will be needed to determine whether the analysis has been adequate with respect to the  metric. 
+
+A more intriguing observation is that, these metrics might not be tight enough to study a machine learning model, for example, certain neuron activation, defined as a behaviour of a convolutional neural network processing images, may appear multiple times when a neural network works with different input instances. This is mainly due to the fact that the abstracted behaviour is too coarse.  Therefore, the definition of behaviours need to be carefully designed so that it strikes a balance between adequacy and complexity.  
+
+\subsection*{Coverage of Operational Use} 
+
+An alternative way of considering the adequacy of verification and testing is to explore the set of all possible input instances. That is, if we are able to enumerate all instances that may appear when the machine learning model is used, and confirm their safety, we are certain about the safety of the machine learning model.  
+
+However, due to the missing of the true data distribution $\mathcal{D}$, it is unlikely that we are able to directly enumerate the operational data instances. To deal with this, methods such as variational autoencoder and generative adversarial network can be utilised to learn the data distribution. Based on the learned data distribution, a set of seeds can be selected for the analysis, as discussed in~\cite{DBLP:journals/corr/abs-2112-00646}. 
+
+Moreover, the direct working with data distribution  $\mathcal{D}$ enables the possibility of integrating human prior knowledge. Intuitively, human experts may have a good level of knowledge that certain features can be more important (and therefore should be weighted higher) in an operational environment than another. For example, snowing on images can be more relevant for Toronto than California. Such prior knowledge can be integrated into the determination of the coverage of operational use (e.g., the learned data distribution) so that the resulting verification and validation is contextually relevant. 
+
+\subsection*{ALARP (``As Low As Reasonably Practicable")}
+
+For both the above coverage methods, the continuity and high-dimensionality of the spaces to be covered make the exhaustive enumeration unlikely. Therefore, certain adaptation of the ALARP (``As Low As Reasonably Practicable") principle might be helpful to strike a cost-benefit balance. Principled approaches are needed to weight the safety risks and measure the cost needed to identify the risks. Then, a monitoring process runs in parallel with the verification and validation process to determine when the cost involved in identifying the risks would be grossly disproportionate to the benefit gained. 
+
+
+\subsection*{Expected Outcome} 
+
+The outcome of the adequacy of verification and validation is either a proof of the adequacy or a validation report containing objective measurement on the adequacy. A justification on the cost-benefit balance is also needed. 

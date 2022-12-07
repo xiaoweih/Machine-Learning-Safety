@@ -1,0 +1,65 @@
+% -*- coding: utf-8 -*-
+% Custom lists (with enumitem):
+
+\setlist{noitemsep}
+\setlist[1]{labelindent=\parindent} % < Usually a good idea
+\newlist{compactitem}{itemize}{4}
+\setlist[compactitem,1]{nolistsep,label=\textbullet}
+\setlist[description]{font=\mdseries\itshape}
+\newlist{mathdesc}{description}{4}
+\newlist{mathpardesc}{description}{4}
+\newlist{mathpardesc*}{description}{4}
+\newlist{mathpardesc**}{description*}{4}
+\newcommand*{\keymathbox}[1]{%
+  \mdseries%
+  \upshape%
+  \setlength{\fboxsep}{.4pt}%
+  \fcolorbox{gray}{white}{%
+  % \fbox{%
+    \strut\ensuremath{#1}%
+  }%
+}%
+\setlist[mathdesc]{format=\ensuremath}
+\setlist[mathpardesc]{format=\keymathbox,% , labelindent=1em
+  % leftmargin=0pt,
+  leftmargin=\parindent,
+  labelindent=0pt,
+}
+\setlist[mathpardesc*]{format=\keymathbox,
+  nosep,
+  leftmargin=0pt,
+  labelindent=\parindent,
+}
+\setlist[mathpardesc**]{format=\keymathbox,mode=unboxed}
+
+\newlist{bolddescr}{description}{4}
+\newcommand*{\mybolddescritem}[1]{\bfseries\upshape{#1}:}%
+\setlist[bolddescr]{style=sameline, nosep, format=\mybolddescritem,
+  leftmargin=0pt, labelindent=0pt,
+}
+
+% Bold labels:
+\newcommand*\maindescfmt[1]{\upshape\bfseries #1:}%
+\newlist{maindesc}{description}{4}
+\setlist[maindesc]{%
+  nosep,
+  format=\maindescfmt,
+  style=nextline,
+  labelindent=0pt,
+  leftmargin=\parindent,
+}
+
+\newlist{subdesc}{description}{4}
+\setlist[subdesc]{%
+  nosep,
+  style=sameline,
+  format=\mdseries\itshape\(\circ\)~,
+  leftmargin=\parindent,
+  labelindent=2pt,
+  % left=0pt,
+}
+
+\endinput
+% Local variables:
+% TeX-master: "main"
+% End:

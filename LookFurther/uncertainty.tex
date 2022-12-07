@@ -1,0 +1,7 @@
+\subsection*{Uncertainty Estimation}
+
+
+
+Essentially, a machine learning model is  a function that is obtained by minimising a given loss function over a set of training data. The function may behave wrongly, which can be evaluated with verification and validation techniques or detected with runtime monitoring techniques. In addition to the misbehaviour, another key concern is on the confidence of the machine learning model in making the wrong decision. It is clear that the situation is worse if a misbehaviour is conducted with high confidence than with low confidence. The confidence naturally comes with the Bayesian view on learning, where a deterministic trained model (such as a trained neural network) is seen as a sample from a distribution of models. Uncertainty estimation on machine learning models has been intensively discussed, with some existing methods such as MC dropout \cite{10.5555/3045390.3045502} and deep ensemble~\cite{DBLP:conf/nips/Lakshminarayanan17} that can be applied for neural networks. 
+
+The evaluation of uncertainty estimation methods is non-trivial, mainly due to the lack of ``ground-truth'' uncertainties. It is therefore useful to evaluate against a set of concrete baseline datasets and evaluation metrics that cover all types of uncertainties. In addition, a typical measurement regarding risk-averse and worst case scenarios is usually considered. Specifically, it requires that uncertainty predictions with a very high predicted uncertainty should never fail. 

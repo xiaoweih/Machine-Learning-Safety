@@ -1,0 +1,112 @@
+%\newpage
+\section{Membership Inference}\label{sec:membershipInferenceDL}
+
+As described in Section~\ref{sec:membershipinferencedefinition}, membership inference is to determine if an input $\textbf{x}$ is in the training dataset $D_{train}$ of a machine learning model $f$. 
+In the following, we consider two classes of attack methods: metric-based methods and binary classifier based methods. While these methods may have different formalism and performance, all of them are based on the fact that the machine learning model $f$ has different behaviour on training data and test data. The behavioural difference is exhibited through e.g., prediction probability, loss, and hidden activations.   
+
+\subsection{Metric Based Method}
+
+Metric based method proceeds by first calculating a metric $M$ and then determining the membership of $\textbf{x}$ by comparing the value of the metric with a pre-specified threshold. According to the knowledge available to the attacker, there are different metrics as follows. 
+
+\subsection*{Prediction Label Metric} 
+
+Recall that $C$ is the set of classes and $y$ is the ground-truth label of $\textbf{x}$, we have 
+
+\begin{equation}
+    M_{label}(\textbf{x}) = \mathbbm{1}(\argmax_{c\in C} f(\textbf{x})(c) = y )
+\end{equation}
+where $\hat{y} = \argmax_{c\in C} f(\textbf{x})(c)$ is the predictive label and $\mathbbm{1}$ is the indicator function such that 
+\begin{equation}
+    \mathbbm{1}(a) = \left \{
+    \begin{array}{cl}
+        1 &  \text{if $a$ is True} \\
+        0 &  \text{otherwise}
+    \end{array}
+    \right.
+\end{equation}
+Intuitively, this metric is based on the assumption that the model $f$ generalises so badly that it can only predict correctly on the training dataset. Based on this assumption, the sample is in the training dataset if and only if the prediction made by $f$ is correct. This attack method is black-box, i.e., it requires only knowledge \textbf{K6} (Section~
+\ref{sec:attackknowlege}). 
+
+However, most machine learning algorithms -- in particular deep neural networks --  can generalise well, which renders the above metric too coarse for membership inference.  
+
+\subsection*{Prediction Loss Metric} 
+
+Let $\mathcal{L}$ be the training loss function and $\epsilon$ a prespecified threshold, we define 
+\begin{equation}
+    M_{loss}(\textbf{x}) = \mathbbm{1}(\mathcal{L}(f(\textbf{x}), y)\leq \epsilon)
+\end{equation}
+Intuitively, it means that the sample $\textbf{x}$ is a member of the training dataset if its prediction loss is insignificant (i.e., smaller than $\epsilon$). The rationale behind this is that, the machine learning algorithm is trained by minimising the loss of the training data, and therefore a smaller loss suggests a higher possibility that the sample is in the training dataset. Unlike $M_{label}$ which is a black-box attack, this method requires the knowledge about the training process (or more specifically, the training loss function), i.e., the attacker knowledge \textbf{K5}. 
+
+\subsection*{Prediction Entropy Metric}  
+
+Recall the entropy as defined in Definition~\ref{def:entropy}, we have 
+\begin{equation}
+    M_{loss}(\textbf{x}) = \mathbbm{1}(H(f(\textbf{x}))\leq \epsilon)
+\end{equation}
+where $\epsilon$ is a pre-specified threshold. This metric is based on an observation that the uncertainty of the prediction, expressed as the entropy of the prediction probability, is smaller for training data sample than test data sample. This method is black-box. 
+
+\subsection{Binary Classifier Based Method}
+
+While the above metric-based methods are simple and easy to compute, they might not perform well because modern machine learning algorithms can generalise well, and more importantly, the machine learning models are very complex so that their different behaviours on the test and training datasets cannot be easily differentiated with simple metrics. This has led to the below discussion on learning a binary classifier for the membership inference. 
+
+
+Intuitively, Binary classifier based attack is to learn a binary classifier $f_a$, which is able to predict the membership according to the prediction probability of the victim model $f_{victim}$. Algorithm~\ref{alg:MembershipInferencealgorithm} presents a generic framework for conducting the membership inference attack. It is a black-box algorithm and therefore can be applied to any machine learning model. 
+
+\begin{algorithm}[!htbp]
+\SetAlgoLined
+Synthesise datasets $\textbf{X}_{syn,train}$ and  $\textbf{X}_{syn,test}$  such that $\textbf{X}_{syn,train}\cap \textbf{X}_{syn,test}=\emptyset$ and they follow the same distributions as the training and testing datasets of $f_{victim}$, respectively. 
+%For example,  $\textbf{X}_{syn,train}=\{(\textbf{x}_1,f_{victim}(\textbf{x}_1)),...,(\textbf{x}_n,f_{victim}(\textbf{x}_n))\}$.  
+\\
+Construct a function $f_g: \real^{m} \rightarrow (\real^k,\{0,1\})$ that maps instances in $\textbf{X}_{syn,train}$ and  $\textbf{X}_{syn,test}$ to pairs of (probability  distribution, Binary value) \\
+Train a Binary classifier $f_a: \real^k \rightarrow \{0,1\}$ that maps probability distributions to binary values by using the dataset $f_g(\textbf{X}_{syn,train})\cup f_g(\textbf{X}_{syn,test})$. \\
+\Return $f_{a}\cdot f_{victim} : \real^{m} \rightarrow \{0,1\} $, which maps any sample $\textbf{x}$ to a binary value indicating whether $\textbf{x}$ is in the training dataset of $f_{victim}$.
+ \caption{$\functionname{MembershipInferenceAttack}(f_{victim},m,k)$, where $f_{victim}$ is the original model that the user can access/query, $m$ is the number of input features, and $k$ is the number of classes. }
+ \label{alg:MembershipInferencealgorithm}
+\end{algorithm}
+
+The algorithm takes three steps to train a binary classifier $f_a$, as discussed in the following. 
+%
+%\subsection*{Synthesising datasets $\textbf{X}_{syn,train}$ and $\textbf{X}_{syn,test}$} 
+%
+The first step is to synthesise datasets $\textbf{X}_{syn,train}$ and $\textbf{X}_{syn,test}$ that are of the same distribution as the training and test dataset of $f_{victim}$, respectively. This can be obtained with e.g., the iterative process as in Line 6-11 of Algorithm~\ref{alg:modelstealingalgorithm}. But other algorithms may also apply, for example. we can first learn a distribution from the training dataset with e.g., a generative model, and then sample dataset $\textbf{X}_{syn,train}$ from the learned distribution.  
+
+%\subsection*{Constructing function $f_g$} 
+The second step is to construct a function $f_g$ over the datasets $\textbf{X}_{syn_train}$ and $\textbf{X}_{syn,test}$. 
+%partition the dataset $\textbf{X}_{syn}$ into $\textbf{X}_{syn, train}$ and $\textbf{X}_{syn, test}$, and 
+This is done by first using $\textbf{X}_{syn, train}$ to train a surrogate model $f_{surrogate}$, and then letting 
+\begin{equation}
+    f_g(\textbf{x}) = \left \{
+      \begin{array}{cl}
+         (f_{surrogate}(\textbf{x}),1)  &     \text{if } \textbf{x}\in \textbf{X}_{syn, train},\\
+         (f_{surrogate}(\textbf{x}),0)  &      \text{if } \textbf{x}\in \textbf{X}_{syn, test}
+      \end{array}
+    \right.
+\end{equation} 
+
+%\subsection*{Training Binary classifier $f_a$}
+
+The third step is to train a Binary classifier $f_a$. 
+From $f_g$ and $\textbf{X}_{syn}=\textbf{X}_{syn,train}\cup \textbf{X}_{syn,test}$, we have a dataset $f_g(\textbf{X}_{syn})$. Then, the Binary classifier $f_a$ can be obtained by using $f_g(\textbf{X}_{syn})$ as the training dataset on any machine learning model. 
+
+
+
+\subsection*{Predicting whether new sample $\textbf{x}$ is in the training dataset of $f_{victim}$} If $f_a(f_{victim}(\textbf{x}))=0$ then it is predicted that $\textbf{x}$ is not in the training dataset. However, if $f_a(f_{victim}(\textbf{x}))=1$ then it is predicted that $\textbf{x}$ is in the training dataset. 
+
+\subsection*{Enhancement of $f_a$ through Ensemble Method}
+
+%We remark that, the 
+The computation of $f_a$ can be improved if we take ensemble method. That is, we can have a set of classifiers $f_{a,1},...,f_{a,k}$ with Algorithm~\ref{alg:MembershipInferencealgorithm} and then the prediction on an input $\textbf{x}$ is done through a voting mechanism over these classifiers. Alternatively, we can repeat the first two steps to have a set of datasets $f_{g,1}(\textbf{X}_{syn,1}), ..., f_{g,k}(\textbf{X}_{syn,k})$, and then train a Binary classifier $f_a$ over the joint dataset $f_{g,1}(\textbf{X}_{syn,1})\cup ...\cup f_{g,k}(\textbf{X}_{syn,k})$. 
+
+
+\subsection*{White-box attack}
+
+If the attacker has more knowledge of the model $f_{victim}$, we can let the surrogate models have the same structure as the victim model and then lift the first element of $f_{g}(\textbf{x})$ to include not only the prediction probability but also other information such as the latent representations of layers. In this way, the Binary classifier $f_a$ will have more input features, which will lead to more accurate membership inference. 
+
+\subsection*{Discussion} 
+
+The above Binary classifier based membership inference algorithm is generic and model agnostic. It works well for simple datasets, such as low-dimensional tabular datasets, but might not work well for complex datasets, such as high-resolution image datasets. This is mainly because of the creation of dataset $\textbf{X}_{syn}$. For high-dimensional datasets, the creation of a synthetic dataset that is of the same distribution as the training dataset is non-trivial, and may require a large number of samples. 
+
+Moreover, a membership inference attack becomes easier when the original model is overfitted. Intuitively, an overfitted model ``remembers'' the training data samples in its trainable parameters, and is therefore subject to the attack. Therefore, the improvement to the generalisation -- or the reduction of generalisation error -- of the model also poses a positive impact on data privacy. Nevertheless, a more principled study on the exact relation between them is needed. 
+
+
+

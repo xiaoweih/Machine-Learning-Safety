@@ -1,0 +1,456 @@
+\newpage
+\chapter{Linear Regression}
+
+
+Linear regression assumes a linear model as the underlying learning model. In the linear model, the output $\hat{y}$ can be expressed with a linear combination of its input features $X_1,...,X_n$. While linear regression is less expressive (i.e., the hypothesis space is small), it has the significant benefit of being interpretable. Therefore, for either small applications (where linear models are sufficient for problems) or applications where interpretability goes over the precision, linear regression and its variants are popular machine learning algorithms. Moreover, linear regression has the other advantage of having an analytic solution, i.e., the optimal linear model can be learned. 
+
+In this section, we will first present linear regression and then discuss two variants: linear classification and logistic regression, in Section~\ref{sec:linearclassification} and Section~\ref{sec:logisticregression}, respectively. We will then discuss robustness attack in Section~\ref{sec:LRrobustness}, model stealing in Section~\ref{sec:modelstealinglinearregression}, and  other safety threats. Similar as the learning algorithm, some attacks of linear regression also have analytical solutions. 
+
+\section{Linear Regression}
+
+Given a set of training data $D=\{(\textbf{x}^{(i)},y^{(i)})|i\in \{1,...,m\}\}$ sampled identically and independently from a distribution ${\cal D}$, linear regression assumes that the relationship between the label $Y$ and the $n$-dimensional variable $X$ is linear. More specifically, it is assume that the hypothesis space ${\cal H}$ is within linear models. 
+
+
+Therefore, the goal is to find a parameterised function
+\begin{equation}
+    f_{\textbf{w}}(x)= \textbf{w}^T\textbf{x}
+\end{equation}
+that minimises the following $L_2$  loss (or mean square error) 
+\begin{equation}\label{equ:linearregressions}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m(\textbf{w}^T\textbf{x}^{(i)}-y^{(i)})^2
+\end{equation}
+Note that, $\textbf{w}^T\textbf{x}^{(i)}-y^{(i)}$ represents the loss of the instance $\textbf{x}^{(i)}$. If written in matrix form, it is 
+\begin{equation}\label{equ:linearregression2}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m(\textbf{w}^T\textbf{x}^{(i)}-y^{(i)})^2 = \frac{1}{m}||\textbf{X}\textbf{w}-\textbf{y}||_2^2
+\end{equation}
+
+\begin{example}\label{example:linearregression}
+Assume we have a set of four samples: 
+
+\begin{equation}
+(\begin{bmatrix}
+182 \\
+87\\
+11.3
+\end{bmatrix},325), 
+(\begin{bmatrix}
+189 \\
+92\\
+12.3
+\end{bmatrix},344),
+(\begin{bmatrix}
+178 \\
+79\\
+10.6
+\end{bmatrix},350),
+(\begin{bmatrix}
+183 \\
+90\\
+12.7
+\end{bmatrix},320)
+\end{equation}
+Now, given a learned function $f_{\textbf{w}}(\textbf{x})$ such that $\textbf{w}=(1,-1,20)^T$, we have 
+\begin{equation}
+    \textbf{w}^T\textbf{x}^{(1)}=321, \textbf{w}^T\textbf{x}^{(2)}=343,
+    \textbf{w}^T\textbf{x}^{(3)}=311,
+    \textbf{w}^T\textbf{x}^{(4)}=347. 
+\end{equation}
+Therefore, we can compute the loss with Equation (\ref{equ:linearregressions}).
+\end{example}
+
+\subsection*{Variant: Linear regression with bias} It is possible that we may consider the function $f$ with bias term: 
+\begin{equation}
+    f_{\textbf{w,b}}(x)= \textbf{w}^T\textbf{x} + \textbf{b}
+\end{equation}
+To handle this case, we can reduce it to the case without bias by letting 
+\begin{equation}
+    \textbf{w}' = [\textbf{w};\textbf{b}], \textbf{x}'=[\textbf{x};1]
+\end{equation}
+Then, we have 
+\begin{equation}
+    f_{\textbf{w,b}}(x)= \textbf{w}^T\textbf{x} + \textbf{b} = (\textbf{w}')^T(\textbf{x}')
+\end{equation}
+Intuitively, every instance is extended with one more feature whose value is always 1, and we assume that we already know the weight for this feature in $f_{\textbf{w,b}}$, which is $\textbf{b}$. 
+
+\begin{example}
+Continue with Example~\ref{example:linearregression}, if we have $\textbf{b}=(-330,-330,-330)^T$, we have 
+\begin{equation}
+    \textbf{w}^T\textbf{x}^{(1)}+b^{(1)}=-9, \textbf{w}^T\textbf{x}^{(2)}+b^{(2)}=13,
+    \textbf{w}^T\textbf{x}^{(3)}+b^{(3)}=-19,
+    \textbf{w}^T\textbf{x}^{(4)}+b^{(4)}=17. 
+\end{equation}
+\end{example}
+
+\subsection*{Variant: Linear regression with lasso penalty }
+
+We may also be interested in adapting the loss, e.g., consider the following loss 
+\begin{equation}\label{equ:linearregressionlassopenalty}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m(\textbf{w}^T\textbf{x}^{(i)}-y^{(i)})^2 + \lambda ||\textbf{w}||_1
+\end{equation}
+where the lasso penalty term $||\textbf{w}||_1$ is to encourage the sparsity of the weights. 
+
+
+\section{Linear Classification}\label{sec:linearclassification}
+
+To consider classification task where $y^{(i)}$'s are labels instead of regression values, a natural attempt is to 
+change the hypothesis class ${\cal H}$ from the set of linear models to a set of piece-wise linear models.
+%
+For simplicity, assume that we are working with binary classification, i.e., $V(Y)=\{0,1\}$. Then, the hypothesis class ${\cal H}$ is parameterised over $\textbf{w}$ such that 
+ \begin{equation}
+    f_{\textbf{w}}(\textbf{x}) =  \begin{cases}
+    1 & \text{if }\textbf{w}^T\textbf{x} > 0\\
+    0 & \text{otherwise}
+    \end{cases}
+\end{equation} 
+
+\subsection*{What is the corresponding optimisation problem?} With the hypothesis class ${\cal H}$, the classification problem is to find a parameterised function \begin{equation}\label{equ:linearclassification1}
+    f_{\textbf{w}}'(\textbf{x})= \textbf{w}^T\textbf{x}
+\end{equation}
+that minimises the following loss
+\begin{equation}\label{equ:linearclassification2}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m I[step(\textbf{w}^T\textbf{x}^{(i)}), y^{(i)}]
+\end{equation}
+where $step$ function is defined as:  $step(m)=1$ when $m>0$ and $step(m)=0$ otherwise, and $I(\hat y,y)$ is the 0-1 loss, i.e., $I(\hat y,y)=0$ when $\hat y=y$ and $I(\hat y,y)=1$ otherwise. 
+
+%\begin{example}
+%The readers are referred to Question~\ref{question:linearregression} for a concrete example of linear classification. 
+%\end{example}
+
+\subsection*{Difficulty of finding optimal solution} 
+
+Unfortunately, the finding of optimal solution to the optimisation problem in Equation (\ref{equ:linearclassification1}) and (\ref{equ:linearclassification2}) is NP-hard. 
+
+\section{Logistic Regression} \label{sec:logisticregression}
+
+Given the above natural -- but nevertheless naive -- attempt does not necessarily lead to a good method for the classification problem, it is needed to consider other options, such as logistic regression. 
+
+Linear regression attacks the classification problem by attempting to make the regression values as probability values. That is, if the return of $f_{\textbf{w}}(\textbf{x})$ is a probability value of classifying $\textbf{x}$ as 0, then we are easy to infer the classification by using the regression value of $\textbf{x}$. This, however, is not straightforward as the linear regression may return values outside of [0,1]. 
+
+\subsection*{Sigmoid function} First of all, we need to make sure that the regression value within [0,1]. This can be done through applying the sigmoid function
+\begin{equation}
+    \sigma(a) = \frac{1}{1+\exp(-a)}
+\end{equation}
+which has the domain $(0,1)$. Therefore, we can now update Equation (\ref{equ:linearclassification2}) into 
+\begin{equation}\label{equ:logisticregression1}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m (\sigma(\textbf{w}^T\textbf{x}^{(i)})- y^{(i)})^2
+\end{equation}
+
+However, even so, it is still unclear whether $\sigma(\textbf{w}^T\textbf{x}^{(i)})$ represents the probability value. 
+
+\subsection*{Force $\sigma(\textbf{w}^T\textbf{x}^{(i)})$ into probability value} To achieve this, we make the following interpretation 
+\begin{equation}\label{equ:logisticregression2}
+\begin{array}{lll}
+    P_{\textbf{w}}(y=1|\textbf{x}) &  = \sigma(\textbf{w}^T\textbf{x}^{(i)}) & \\
+     P_{\textbf{w}}(y=0|\textbf{x}) & = 1- P_{\textbf{w}}(y=1|\textbf{x}) & = 1 - \sigma(\textbf{w}^T\textbf{x}^{(i)})\\
+\end{array}
+\end{equation}
+Then, we can update the loss (Equation (\ref{equ:linearclassification2})) into 
+\begin{equation}\label{equ:logisticregression3}
+    \hat{L}(f_\textbf{w}) = - \frac{1}{m}\sum_{i=1}^m \log P_{\textbf{w}}(y^{(i)}|\textbf{x}^{(i)})
+\end{equation}
+By applying Equation (\ref{equ:logisticregression2}), we have 
+\begin{equation}\label{equ:logisticregression3}
+\begin{array}{rl}
+    \hat{L}(f_\textbf{w}) = &  - \displaystyle \frac{1}{m}\sum_{y^{(i)}=1} \log \sigma(\textbf{w}^T\textbf{x}^{(i)}) - \frac{1}{m}\sum_{y^{(i)}=0} \log [1-\sigma(\textbf{w}^T\textbf{x}^{(i)})]\\
+    = & - \displaystyle \frac{1}{m} \sum_{(\textbf{x},y)\in D} y\log \sigma(\textbf{w}^T\textbf{x}) + (1-y) \log [1-\sigma(\textbf{w}^T\textbf{x})] 
+\end{array}
+\end{equation}
+
+\begin{example}
+%The readers are referred to Question~\ref{question:linearregression} for a concrete example of logistic regression. 
+Consider the four data samples in Example~\ref{example:linearregression} (also provided in Table~\ref{tab:footballplayers2}) 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+      $X_1$   & $X_2$ & $X_3$ & $Y$ \\
+      \hline
+      182   & 87 & 11.3 & 325 \\
+      189   & 92 & 12.3 & 344 \\
+      178   & 79 & 10.6 & 350 \\
+      183   & 90 & 12.7 & 320 \\
+      \hline
+    \end{tabular}
+    \caption{A small dataset}
+    \label{tab:footballplayers2}
+\end{table}
+and the mean square error, if we have the following two functions: 
+\begin{itemize}
+    \item $f_{\textbf{w}_1}=2X_1+1X_2+20X_3-330$
+    \item $f_{\textbf{w}_2}=X_1-2X_2+23X_3-332$
+\end{itemize}
+
+(1) Because 
+\begin{equation}
+\begin{array}{rll}
+    f_{\textbf{w}_1}(\textbf{x}_1)-y_1 = & 2*182+1*87+20*11.3-330-325 & =  22 \\
+    f_{\textbf{w}_1}(\textbf{x}_2)-y_2 = & 2*189+1*92+20*12.3-330-344 & =  42 \\
+    f_{\textbf{w}_1}(\textbf{x}_3)-y_3 = & 2*178+1*79+20*10.6-330-350 & =  -33 \\
+    f_{\textbf{w}_1}(\textbf{x}_4)-y_4 = & 2*183+1*90+20*12.7-330-320 & =  60 \\
+    
+    f_{\textbf{w}_2}(\textbf{x}_1)-y_1 = & 182-2*87+23*11.3-332-325 & =  -389.1 \\
+    f_{\textbf{w}_2}(\textbf{x}_2)-y_2 = & 189-2*92+23*12.3-332-344 & =  -388.1 \\
+    f_{\textbf{w}_2}(\textbf{x}_3)-y_3 = & 178-2*79+23*10.6-332-350 & =  -418.2 \\
+    f_{\textbf{w}_2}(\textbf{x}_4)-y_4 = & 183-2*90+23*12.7-332-320 & =  -356.9 \\
+\end{array}
+\end{equation} the model $f_{\textbf{w}_1}$ is better than $f_{\textbf{w}_2}$ for linear regression, according to the loss function (Equation~\ref{equ:linearregression2}); 
+
+
+
+(2) For an instance $\textbf{y}^T=(0,1,1,0)$, because
+\begin{equation}
+\begin{array}{cc}
+    step(f_{\textbf{w}_1}(\textbf{x}_1))=1\\
+    step(f_{\textbf{w}_1}(\textbf{x}_2))=1\\
+    step(f_{\textbf{w}_1}(\textbf{x}_3))=1\\
+    step(f_{\textbf{w}_1}(\textbf{x}_4))=1\\
+    step(f_{\textbf{w}_2}(\textbf{x}_1))=0\\
+    step(f_{\textbf{w}_2}(\textbf{x}_2))=0\\
+    step(f_{\textbf{w}_2}(\textbf{x}_3))=0\\
+    step(f_{\textbf{w}_2}(\textbf{x}_4))=0\\
+\end{array}
+\end{equation}
+we have that both models are the same for linear classification
+ 	   by considering 0-1 loss, according to the loss function (Equation~\ref{equ:linearclassification2}); 
+
+
+(3) For an instance $\textbf{y}^T=(0,1,1,0)$, because 
+\begin{equation}
+\begin{array}{rcl}
+    y_1*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_1)))+(1-y_1)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_1))))&=&-M\\
+    y_2*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_2)))+(1-y_2)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_2))))&=&0\\
+    y_3*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_3)))+(1-y_3)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_3))))&=&0\\
+    y_4*\log(\sigma(f_{\textbf{w}_1}(\textbf{x}_4)))+(1-y_4)\log((1-\sigma(f_{\textbf{w}_1}(\textbf{x}_4))))&=&-M\\
+    
+    y_1*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_1)))+(1-y_1)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_1))))&=&0\\
+    y_2*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_2)))+(1-y_2)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_2))))&=&-44.1\\
+    y_3*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_3)))+(1-y_3)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_3))))&=&-68.2\\
+    y_4*\log(\sigma(f_{\textbf{w}_2}(\textbf{x}_4)))+(1-y_4)\log((1-\sigma(f_{\textbf{w}_2}(\textbf{x}_4))))&=&-1.1\\
+\end{array}
+\end{equation}
+where $M$ represents a large number, so we have  
+\begin{equation}
+\begin{array}{c}
+\hat{L}(f_{\textbf{w}_1}) = -\frac{1}{4}(-M+0+0-M)=M/2\\
+\hat{L}(f_{\textbf{w}_2}) = -\frac{1}{4}(0-44.1-68.2-1.1)=28.35
+\end{array}
+\end{equation}
+according to Equation (\ref{equ:logisticregression3}). 
+Therefore, $f_{\textbf{w}_2}$ is better for logistic regression. 
+
+(4) According to the logistic regression of the first model, to know the prediction result of the first model on a new input $(181,92,12.4)$,  according to Equation (\ref{equ:logisticregression2}), we have 
+\begin{equation}
+\begin{array}{c}
+     P_{\textbf{w}_1}(y=1|\textbf{x})=\sigma(2*181+1*92+20*12.4-330)=1 \\
+     P_{\textbf{w}_1}(y=0|\textbf{x})=1-\sigma(2*181+1*92+20*12.4-330)=0
+\end{array}
+\end{equation}
+Therefore, it is predicted to 1. 
+
+\end{example}
+
+\section{Robustness and Adversarial Attack}\label{sec:LRrobustness}
+
+Considering a Binary classification problem, i.e., $y\in \{+1,-1\}$ for any data instance $\textbf{x}$, the loss for a single instance $(\textbf{x},y)$ as in Equation (\ref{equ:logisticregression3}) is  
+\begin{equation}\label{equ:logisticregression4}
+\begin{array}{rl}
+    \hat{L}(f_\textbf{w},(\textbf{x},y)) = & - \displaystyle   y\log \sigma(\textbf{w}^T\textbf{x}) - (1-y) \log [1-\sigma(\textbf{w}^T\textbf{x})] 
+\end{array}
+\end{equation}
+
+The computation of adversarial example is to solve the following optimisation problem: 
+\begin{equation}
+    \begin{array}{rl}
+    \displaystyle\text{maximise}_{||\textbf{\textdelta}||\leq \epsilon}  & \hat{L}(f_\textbf{w},(\textbf{x}+\textbf{\textdelta},y)) 
+    \end{array}
+\end{equation}
+which finds the greatest loss within the constraint over the perturbation $\textbf{\textdelta}$. 
+We note that, by Equation (\ref{equ:logisticregression4}), this is equivalent to 
+\begin{equation}\label{equ:advlogistic}
+    \begin{array}{rl}
+    \displaystyle\text{minimise}_{||\textbf{\textdelta}||\leq \epsilon}  & y\textbf{w}^T\textbf{\textdelta} 
+    \end{array}
+\end{equation}
+
+Now, considering the $L_\infty$ norm, i.e., $||\textbf{\textdelta}||_\infty\leq \epsilon$, the optimal solution to Equation (\ref{equ:advlogistic})  is 
+
+\begin{equation}
+    \begin{array}{rl}
+    \textbf{\textdelta}^* = & -y\epsilon sign(\textbf{w})
+    \end{array}
+\end{equation}
+where $sign$ is the sign function extracting the sign of real numbers, such that \begin{equation}
+    sign(w) = 
+    \begin{cases}
+    -1 & w < 0 \\
+    0 &  w = 0 \\
+    1 &  w > 0 
+    \end{cases}
+\end{equation}
+and $sign(\textbf{w})$ is the application of $sign$ on all entries of $\textbf{w}$. 
+
+
+\section{Poisoning Attack}
+
+%linear regression \cite{DBLP:journals/corr/abs-1804-00308}
+%logistic regression \cite{236234}
+
+We can use both the heuristic approaches and the alternating optimisation approach we will introduce in Section~\ref{sec:poisoningattackdeeplearning} for the poisoning attack. Heuristic approaches require the feature extraction function $g$, which can be replaced with the original sample, i.e., let $g(\textbf{x})=\textbf{x}$. 
+
+\section{Model Stealing}\label{sec:modelstealinglinearregression}
+
+Recall that model stealing attack is to reconstruct another model $f'$ given an existing, trained model $f$. In this section, we consider a simplified scenario where $f$ and $f'$ share the same structure with the only difference being on the trainable parameters. 
+
+
+For the case of linear regression with regularisation (such as the 
+lasso penalty as in Equation (\ref{equ:linearregressionlassopenalty})), we write  the loss function as 
+\begin{equation}
+    \hat{L}(f_\textbf{w}) = L(\textbf{X},\textbf{y}; \textbf{w}) + \lambda R(\textbf{w})
+\end{equation}
+where $L(\textbf{X},\textbf{y}; \textbf{w})$ measures the loss of the dataset when the linear model takes the parameters $\textbf{w}$, and $R(\textbf{w})$ is the regularisation term. 
+
+Assume that, for model stealing attack, we want to learn both $\textbf{w}'$ and $\lambda'$. Moreover, we sample another dataset $\textbf{X}'$ with its prediction $\textbf{y}'$. Similarly as the learning algorithm, we let the gradient of the objective function $\hat{L}(f_\textbf{w})$ be \textbf{0}, i.e., 
+\begin{equation}\label{equ:linearregressionmodelsealing}
+    \frac{\partial \hat{L}(f_\textbf{w})}{\partial \textbf{w}} = \textbf{b} + \lambda \textbf{a} = \textbf{0}
+\end{equation}
+where 
+\begin{equation} 
+    \begin{array}{cl}
+      \textbf{b} =   &  \displaystyle [\frac{\partial L(\textbf{X},\textbf{y}; \textbf{w})}{\partial w_1}, ..., \frac{\partial L(\textbf{X},\textbf{y}; \textbf{w})}{\partial w_{|\textbf{w}|}}]^T \\
+      \textbf{a} =   & \displaystyle [\frac{R(\textbf{w})}{\partial w_1}, ..., \frac{R(\textbf{w})}{\partial w_{|\textbf{w}|}}]^T
+    \end{array}
+\end{equation}
+Note that, Equation (\ref{equ:linearregressionmodelsealing}) is a system of linear equations, where the number of equations can be more than the number of variables. In such case, we can estimate 
+\begin{equation}
+    \lambda = - (\textbf{a}^T \textbf{a})^{-1} \textbf{a}^T \textbf{b}
+\end{equation}
+
+
+
+\section{Membership Inference}
+
+A few examples of membership inference attacks can be referred to Section~\ref{sec:membershipInferenceDL}. Some of them are model agnostic and therefore can be applied to any machine learning model.  
+
+\newpage
+\section{Practice}
+
+For logistic regression,  we add the following code to the \textbf{simpleML.py} file: 
+\begin{lstlisting}[language=Python]
+from sklearn import datasets
+iris = datasets.load_iris()
+X_train, X_test, y_train, y_test = train_test_split(iris.data[:100], iris.target[:100], test_size=0.20)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from sklearn.linear_model import LogisticRegression
+reg = LogisticRegression(solver='lbfgs', max_iter=10000)
+reg.fit(X_train, y_train)
+print("Training accuracy is %s"% reg.score(X_train,y_train))
+print("Test accuracy is %s"% reg.score(X_test,y_test))
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Python]
+print("Labels of all instances:\n%s"%y_test)
+y_pred = reg.predict(X_test)
+print("Predictive outputs of all instances:\n%s"%y_pred)
+
+from sklearn.metrics import classification_report, confusion_matrix
+print("Confusion Matrix:\n%s"%confusion_matrix(y_test, y_pred))
+print("Classification Report:\n%s"%classification_report(y_test, y_pred))
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+from sklearn.metrics import accuracy_score
+def sigmoid(x):
+    z = 1 / (1 + np.exp(-x))
+    return z
+
+def add_b(dataMatrix):
+    dataMatrix = np.column_stack((np.mat(dataMatrix),np.ones(np.shape(dataMatrix)[0])))    
+    return dataMatrix
+
+def LogisticRegression_(x_train,y_train,x_test,y_test,alpha = 0.001 ,maxCycles = 500):
+    x_train = add_b(x_train)
+    x_test = add_b(x_test)
+    y_train = np.mat(y_train).transpose()
+    y_test = np.mat(y_test).transpose()
+    m,n = np.shape(x_train)     
+    weights = np.ones((n,1))
+    for i in range(0,maxCycles):
+        h = sigmoid(x_train*weights)
+        error = y_train - h
+        weights = weights + alpha * x_train.transpose() * error
+        
+    y_pre = sigmoid(np.dot(x_train, weights))
+    for i in range(len(y_pre)):        
+        if y_pre[i] > 0.5:
+            y_pre[i] = 1
+        else:
+            y_pre[i] = 0
+    print("Train accuracy is %s"% (accuracy_score(y_train, y_pre)))
+    
+    y_pre = sigmoid(np.dot(x_test, weights))
+    for i in range(len(y_pre)):        
+        if y_pre[i] > 0.5:
+            y_pre[i] = 1
+        else:
+            y_pre[i] = 0
+    print("Test accuracy is %s"% (accuracy_score(y_test, y_pre)))
+
+weights = LogisticRegression_(X_train, y_train,X_test,y_test)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+import itertools
+import copy 
+
+# Attack on LogisticRegression
+def LogisticRegression_attack(weights, X_predict, y_predict): 
+    X_predict = add_b(X_predict)
+    m = np.diag([0.5,0.5,0.5,0.5])*4
+    flag = True
+    for i in range(1,5):
+        for ii in list(itertools.combinations([0,1,2,3],i)):
+            delta = np.zeros(4)
+            for jj in ii:
+                delta += m[jj]
+            delta = np.append(delta, 0.)
+            
+            y_pre = sigmoid(np.dot(copy.deepcopy(X_predict)+delta, weights))       
+            if y_pre > 0.5:
+                y_pre = 1
+            else:
+                y_pre = 0
+            if y_predict != y_pre:
+                X_predict += delta
+                flag = False
+                break
+                
+            y_pre = sigmoid(np.dot(copy.deepcopy(X_predict)-delta, weights))       
+            if y_pre > 0.5:
+                y_pre = 1
+            else:
+                y_pre = 0
+            if y_predict != y_pre:
+                X_predict -= delta
+                flag = False
+                break
+        if not flag:
+            break
+    
+    y_pre = sigmoid(np.dot(X_predict, weights))       
+    if y_pre > 0.5:
+        y_pre = 1
+    else:
+        y_pre = 0
+    print('attack data: ', X_predict[0,:-1])
+    print('predict label: ', y_pre)
+
+X_test_ = X_test[0:1]
+y_test_ = y_test[0]
+print('original data: ', X_test_)
+print('original label: ', y_test_)
+LogisticRegression_attack(weights, X_test_, y_test_)
+\end{lstlisting}

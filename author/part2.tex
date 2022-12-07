@@ -1,0 +1,27 @@
+%%%%%%%%%%%%%%%%%%%%%part.tex%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% sample part title
+%
+% Use this file as a template for your own input.
+%
+%%%%%%%%%%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{partbacktext}
+\part{Safety Threats}\label{chap:simple}\label{part:simple}
+%\noindent Use the template \emph{part.tex} together with the document class SVMono (monograph-type books) or SVMult (edited books) to style your part title page and, if desired, a short introductory text (maximum one page) on its verso page.
+
+This part will exploit the machine learning models to understand the threats to their safety and security. We will focus on not only traditional machine learning models but also deep learning. Traditional machine learning models to be considered include decision trees, k-nearest neighbour, linear regression, and Naive Bayes. For deep learning, we will consider feedforward neural networks, which include convolutional neural networks.  Besides, two key concepts will be introduced: gradient descent, and loss functions, which are useful for both traditional machine learning and deep learning on not only their training algorithms but also their related  attack, defence, and verification algorithms. 
+
+
+
+For each machine learning model, instead of moving directly into the discussion on its safety threats, we will first explain its basic knowledge, including the structure of the model and its training algorithm. This is followed by presenting safety threats through various algorithms to exploit different vulnerabilities. The safety threats to be discussed are  with respect to the properties we discussed in Chapter~\ref{sec:defsafetyissues}. 
+%Because machine learning safety is a very active research area, these algorithms do not necessarily be the best performing ones. Nevertheless, they 
+These algorithms will help the readers understand the safety and security issues and hopefully inspire new, better algorithms. 
+
+For every algorithm on some machine learning model, we will often discuss it by considering a few aspects of the algorithms as follows. First of all, we need to know if the algorithm is \emph{sound}, i.e., whether the safety vulnerability discovered by the algorithm is actually an issue of the model. This is trying to understand if the algorithm may generate false alarms. The second is to discuss if the algorithm is \emph{complete}, i.e., whether a report of failure in finding safety vulnerability by the algorithm actually suggests the missing of safety vulnerability. The third aspect to be considered is the information required by the algorithm, i.e., if it is black-box or white-box. The fact that an algorithm is white-box usually suggests that it is dedicated to a certain machine learning model and may not be transferable to other machine learning models. On the other hand, a black-box algorithm usually suggests that the algorithm is applicable to different machine learning models. Moreover, for algorithms, we may want to know their computational complexity, as an indicator of how hard a vulnerability can be discovered. 
+
+%This part will discuss the safety vulnerabilties of simple machine learning algorithms.  his chapter, we will go through a few key machine learning algorithms that do not belong to deep learning. While deep learning is popular, these algorithms are still playing key roles in various applications. These algorithms are more transparent than deep learning, and their results can be easier to be explained. 
+
+%We will consider decision tree, K-nearest neighbor, linear/logistic regression, gradient descent, naive Bayes. For each model, in addition to their training algorithms, we will also present algorithms to exploit their safety vulnerabilities. 
+
+\end{partbacktext}

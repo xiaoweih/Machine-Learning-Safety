@@ -1,0 +1,61 @@
+\section{Privacy Enhancement through Differential Privacy}\label{sec:privacyenhancementsec}
+
+We have presented in Chapter~\ref{sec:defsafetyissues} several security properties related to the leakage of privacy information, including membership inference and model inversion, and then discussed some algorithms that exploit different machine learning algorithms for privacy leakages, for example Chapters \ref{sec:membershipInferenceDL} and \ref{sec:modelInversionDL} for deep learning algorithms. In this section, we consider how to enhance machine learning algorithms so that they may perform better in protecting the privacy information.
+
+A straightforward idea for privacy protection is the naive anonymisation, by removing sensitive features such as names, addresses, and postcodes from the data. Unfortunately, an adversary can identify the user and uncover potentially sensitive information through  auxiliary knowledge. For example, \cite{4531148} shows that for machine learning model trained on Netflix Prize dataset, the attack can utilise auxiliary knowledge from the publicly available Internet Movie Database records.  
+
+While there are many different methods that have been proposed in the literature, we mainly focus on methods based on differential privacy (DP), because DP provides strong theoretical guarantees. 
+
+\subsection{Differential Privacy}
+
+DP was originally developed when needing to publish aggregate information about a statistical database. It is required that the disclosure of private information of the records in the database is limited. 
+
+Let $\mathcal{A}$ be a randomised algorithm that generates an output according to a database. Let $\mathcal{O}_{\mathcal{A}}$ be the set of possible outputs of  $\mathcal{A}$, and we use $\mathcal{S}$ to range over $\mathcal{P}(\mathcal{O})$, i.e.,  the set of subsets of $\mathcal{O}$. 
+
+\begin{definition}
+The algorithm $\mathcal{A}$ is said to provide 
+$\epsilon$-differential privacy for $\epsilon$ a non-negative number, if for all datasets $D_1$ and $D_2$ that differ on a single element, we have 
+\begin{equation}
+    \forall \mathcal{S}\in \mathcal{P}(\mathcal{O}_{\mathcal{A}}):  P(\mathcal{A}(D_1) \in \mathcal{S}) \leq e^{\varepsilon} \cdot P(\mathcal{A}(D_2) \in \mathcal{S})
+\end{equation}
+\end{definition}
+
+Besides, we may also have $(\epsilon,\delta)$-differential privacy as follows. 
+\begin{definition}
+The algorithm $\mathcal{A}$ is said to provide 
+$(\epsilon,\delta)$-differential privacy for two non-negative numbers $\epsilon$ and $\delta$,  if for all datasets $D_1$ and $D_2$ that differ on a single element, we have 
+\begin{equation}
+    \forall \mathcal{S}\in \mathcal{P}(\mathcal{O}_{\mathcal{A}}):  P(\mathcal{A}(D_1) \in \mathcal{S}) \leq \delta + e^{\varepsilon} \cdot P(\mathcal{A}(D_2) \in \mathcal{S})
+\end{equation}
+\end{definition}
+
+Intuitively, $\delta$ represents the probability that the algorithm's output varies by more than a factor of $e^{\epsilon}$ when applied to a dataset $D_1$ and any one of its neighbours $D_2$. A smaller $\delta$ suggests a greater confidence and a smaller $\epsilon$ suggests a tighter standard of privacy protection. Actually, the smaller $\delta$ and $\epsilon$ are,  the closer $P(\mathcal{A}(D_1)$ and $P(\mathcal{A}(D_2) \in \mathcal{S})$ is, and therefore, the stronger privacy protection. 
+
+\subsection{Private Algorithms for Training}
+
+While there are different proposals on integrating noises into training process to enhance the privacy protection (and implementing DP), we discuss a simple algorithm, DP-SGD \cite{DBLP:conf/focs/BassilyST14}, that lifts the stochastic gradient descent (SGD) -- the training algorithm for deep learning -- with noise. Typically, the SGD algorithm iterates over minibatchs, such that each minibatch is a small set of training examples. For every minibatch $D$, it updates the weight as follows: 
+\begin{equation}
+    \theta_{t+1} \leftarrow \theta_t + \eta \nabla_t \mathcal{L}(D;\theta_t)
+\end{equation}
+where $\eta$ is the learning rate, and $\mathcal{L}(D ;\theta_t)$ is a loss function returning the average loss over the training instances in the minibatch $D$ under the current weights $\theta_t$. For DP-SGD, two modifications are made. First of all, the update is done on individual instances, instead of on a minibatch. Second, every gradient is added with a noise, i.e., 
+\begin{equation}
+    \theta_{t+1} \leftarrow \theta_t + \eta( \nabla_t \mathcal{L}(\textbf{x};\theta_t)+ b_t)
+\end{equation}
+where $\textbf{x}$ is a training sample randomly selected from $D_{train}$ and $b_t$ is sampled from a Gaussian noise $\mathcal{N}(0,\sigma^2)$ such that 
+\begin{equation}
+    \sigma = \sqrt{\frac{32 L^2 n^2 \log(n/\delta)\log (1/\delta)}{\epsilon^2}}
+\end{equation}
+This update is conducted for $|D_{train}|^2$ times. 
+It is proved \cite{DBLP:conf/focs/BassilyST14} that this algorithm is $(\epsilon,\delta)$-differential private. 
+
+\subsection{Model Agnostic Private Learning}
+
+The above algorithm adapts the training algorithm for deep learning. In the following, we consider an algorithm, PATE \cite{DBLP:conf/iclr/PapernotAEGT17}, which does not rely on specific machine learning algorithm. Instead, the noise is added when aggregating results from multiple models trained over the partition of the dataset. Actually, the training dataset $D_{train}$ is split into $k$ datasets $D_{train}^1,...,D_{train}^k$, each of which is used to train a model $f^i$ for $i=1..k$. Then, for each class $j\in C$, we let 
+\begin{equation}
+    n_j (\textbf{x})= |\{ f^i(\textbf{x})=j ~|~ i=1..k\}|
+\end{equation}
+be the number of models that predict $\textbf{x}$ as the label $j$. The privacy protected output is 
+\begin{equation}
+    f(\textbf{x}) = \argmax_{j\in C} (n_j(\textbf{x}) + Lap(\frac{1}{\lambda}))
+\end{equation}
+where $Lap(b)$ is the Laplacian distribution with location $0$ and scale $b$, and $\gamma$ is a hyper-parameter. Intuitively, a large $\gamma$ suggests a strong privacy guarantee, but may degrade the accuracy.

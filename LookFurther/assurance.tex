@@ -1,0 +1,59 @@
+\chapter{Reliability Assessment}\label{sec:safetyassurance}
+
+
+In Chapters~\ref{part:deep}, \ref{chap:drl}, and  \ref{chap:testing}, we have introduced  verification and testing techniques for convolutional neural network (CNN) and deep reinforcement learning (DRL).  These techniques are to work with individual safety properties, such as the robustness of a data instance $\textbf{x}$ (for CNN) or the safety of a policy $\pi$ on a given initial state $\textbf{x}_0$ (for DRL). However, considering that deep learning models usually serve as components of a large autonomous system, the safety of the deep learning models is related to how it is used in the system. For example, if a CNN is used as a perception component for e.g., object detection in a self-driving car, there will be a set $D_{op}$ of data instances that may appear in operational time, all of which needs to be verified. If a DRL agent is used as a control component for e.g., navigation in a mobile robot, there will be a set of possible trajectories that may appear in operational time, all of which needs to be verified.  
+%it is possible to operate in an environment that is different from the environment where it is trained. 
+%
+In this chapter, we introduce a principled approach to utilise evidence produced by verification techniques about low-level safety properties (e.g., robustness of individual instances) to reason about high-level safety claims, such as ``the perception component of the self-driving car can correctly classify the next 1,000 instances with probability higher than 99\%''. These high-level safety claims are required in various industrial standards for software used in safety-critical systems. 
+%
+Methodologically, the approach is based on the safety argument, which provides a link between the safety evidence and a safety claim, showing that the safety evidence is sufficient to support the claim. 
+
+
+\section{Reliability Assessment for Convolutional Neural Networks}\label{sec:assuranceCNN}
+
+Assume that, we are working with a verification technique $g$, which, given a network $f$ and a constraint $\mathcal{C}$, returns the probability of the inputs within $\mathcal{C}$ being classified correctly. The constraint $\mathcal{C}$ can be e.g., a norm ball with $\textbf{x}$ as the centre to denote the possible perturbations. 
+
+
+Also, as mentioned above, we assume that there are a set $D_{op}$ of operational data instances. 
+%
+We partition the input domain $\mathcal{D}$ into $m$ cells, subject to the $r$-separation property \cite{pietrantuono_reliability_2020}. These cells are disjoint and altogether form the entire input domain. Let $p_{op}$ be the empirical distribution of the cells estimated with the dataset $D_{op}$. Then, we can learn a generative model $G_{\theta}$ over parameters $\theta$ such that 
+\begin{equation}
+    \theta^* = \argmin_{\theta}  \text{KL}(G_{\theta}, p_{op})
+\end{equation}
+where $\text{KL}(\cdot,\cdot)$ is the KL divergence between two distributions. 
+
+Based on the above, we can estimate the reliability (defined as the probability of failure in classifying the next input) as 
+\begin{equation}
+   \text{Reliability}(f) = \sum_{i=1}^m G_{\theta}(\mathcal{C}_i)(1-g(f,\mathcal{C}_i))
+\end{equation}
+Intuitively, $G_{\theta}(\mathcal{C}_i)$ returns the probability density of the cell $i$ represented as the constraint $\mathcal{C}_i$, and $1-g(f,\mathcal{C}_i)$ returns the failure rate of the neural network $f$ working on inputs satisfying the constraint $\mathcal{C}_i$. 
+
+\cite{zhao_safety_2020,DBLP:journals/corr/abs-2112-00646} show how to develop a principled safety argument %method for  in order 
+to justify the reliability claim by aggregating evidence from either formal verification or statistical evaluation with Bayesian inference \cite{strigini_software_2013}. Other than learning a generative model, there are other methods to learn the  distribution of cells~\cite{zhao_safety_2021}.
+
+
+\section{Reliability Assessment for Deep Reinforcement Learning}\label{sec:DRLrealibility}
+
+The execution of a DRL-driven robot in an environment leads to a trajectory distribution (modelled as a distribute-time Markov chain, as discussed in Chapter~\ref{chap:drl}), where the uncertainty (modelled with probability distribution) is from the environment\footnote{For simplicity, we assume DRL policy is deterministic. There are DRL policies which are probabilistic, but the deterministic assumption is without loss of generality, and the methods we develop in this chapter can be easily adapted to work with probabilistic policies.}. Formally, given an environment $E$, a policy $\pi$, and an initial state $\textbf{x}_0$, we can construct a model ${\cal M}^E(\pi,\textbf{x}_0)$ representing the probability distribution of a set of trajectories. Assume that we have a verification technique $g$, as discussed in Sections~\ref{sec:DRLverification}, \ref{sec:DRLRobustnessverification}, and \ref{sec:verificationtemporalDRLrobustness}. 
+
+
+\begin{definition}
+The verification problem is, given a constructed model ${\cal M}^E(\pi,\textbf{x}_0)$ and a verification tool $g$, to determine whether the model is safe with respect to certain property $\phi$, written as ${\cal M}^E(\pi,\textbf{x}_0)\models^{g} \phi$. We may omit the superscript $g$ and write ${\cal M}^E(\pi,\textbf{x}_0)\models \phi$, if it is clear from the context.  We can also assume that $g$ returns a probability value -- a Boolean answer can be converted into a Dirac probability. Then, the verification problem is to compute $Pr({\cal M}^E(\pi,\textbf{x}_0), \phi)$, i.e., the probability of safety. 
+\end{definition}
+
+
+
+In the following, we discuss how the above verification problem may contribute to the computation of the reliability.  Similar as Section~\ref{sec:assuranceCNN}, we partition the set of possible initial states into $m$ subsets, each of which is represented as a constraint $\mathcal{C}_i$, for $i=1..m$. Then, we can also define the empirical distribution $p_{op}$ over the partitions, and find a model $G_{\theta}$ that is as close as possible to $p_{op}$. Formally, assume that $G_{\theta}$ is a generative model over parameters $\theta$, we have  
+\begin{equation}
+    \theta^* = \argmin_{\theta}  \text{KL}(G_{\theta}, p_{op})
+\end{equation}
+where $\text{KL}(\cdot,\cdot)$ is the KL divergence between two distributions. Let $\textbf{x}_{\mathcal{C}_i}$ be the central point (i.e., a representative) of $\mathcal{C}_i$. 
+
+Based on these, we can estimate the reliability (defined as the probability of failure in satisfying $\phi$ with the policy $\pi$ in the environment $E$) as 
+\begin{equation}
+   \text{Reliability}(E,\pi,\phi) = \sum_{i=1}^m G_{\theta}(\mathcal{C}_i)(1-Pr({\cal M}^E(\pi,\textbf{x}_{\mathcal{C}_i}), \phi))
+\end{equation}
+where $G_{\theta}(\mathcal{C}_i)$ returns the probability density of the partition $i$ that is  represented as the constraint $\mathcal{C}_i$, and $1-Pr({\cal M}^E(\pi,\textbf{x}_{\mathcal{C}_i}), \phi)$ returns the failure rate of the DRL agent $\pi$ working on inputs satisfying the constraint $\mathcal{C}_i$ under the environment $E$. 
+
+Note that, $G_{\theta}$ can be estimated in the same way as the data distribution in the convolutional neural networks. The discussion on the computation of ${\cal M}^E(\pi,\textbf{x}_0)\models \phi$ or $Pr({\cal M}^E(\pi,\textbf{x}_0), \phi)$ is in Chapter~\ref{chap:drl}.
+

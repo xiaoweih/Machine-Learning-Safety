@@ -1,0 +1,93 @@
+%\newpage
+\section{Poisoning Attack}\label{sec:poisoningattackdeeplearning}
+
+As defined in Section~\ref{sec:poisoningattackdefinition}, poisoning attack is to find a set of poisoning instances to add into the training dataset, so that the resulting trained machine learning model will perform in a wrong way according to what is required by the attacker.   
+We consider both heuristic-based approaches, which generate poisoning samples with various heuristics from a set of base samples, and an alternating optimisation approach, which not only finds poisoning samples with heuristics but also continuously refines the obtained poisoning samples. 
+
+\subsection{Heuristic Method}
+
+For heuristic approaches, we assume there is a set $\textbf{X}_b$ of base samples. The objective is to compute another set $\textbf{X}_p$ of poisoning samples such that $\textbf{X}_p$ and $\textbf{X}_b$ are close and a target input $\textbf{x}_{adv}$ is classified as $y_{adv}$. Let $g_{\text{FE}}$ be a feature extraction function that maps every sample into a vector of features. Practically, $g_{\text{FE}}$ can be a neural network or part of a neural network, as discussed in Section~\ref{sec:representationlearning}.  The heuristic methods are discussed in \cite{10.5555/3327345.3327509,pmlr-v97-zhu19a,DBLP:conf/aaai/SahaSP20}.
+
+\subsection*{Feature Collision} Feature collision is to synthesise one poisoning sample $\textbf{x}_{p}^{(i)}\in \textbf{X}_p$ from every base sample $\textbf{x}_{b}^{(i)}\in \textbf{X}_b$ by adding perturbation. Formally,  
+\begin{equation}
+    \textbf{x}_{p}^{(i)} \defequal \argmin_{\textbf{x}} ||g_{\text{FE}}(\textbf{x})-g_{\text{FE}}(\textbf{x}_{adv})||_2^2 + \beta ||\textbf{x} - \textbf{x}_{b}^{(i)}||_2^2
+\end{equation}
+where $\beta$ is a tunable hyper-parameter to balance between two objectives. Intuitively, it requires not only the similarity between $\textbf{x}_{p}^{(i)}$ and $\textbf{x}_{b}^{(i)}$ but also the similarity of feature representations between $\textbf{x}_{p}^{(i)}$ and the target sample $\textbf{x}_{adv}$. 
+
+\subsection*{Convex Polytope} Instead of requiring the alignment of every poisoning sample's feature representation with that of target sample, it is also possible to synthesise the entire set  $\textbf{X}_p$ in a single round by requiring that $g_{\text{FE}}(\textbf{x}_{adv})$ aligns with a convex combination of $g_{\text{FE}}(\textbf{x}_{p}^{(i)})$. Formally, 
+\begin{equation}
+\begin{array}{rl}
+    \textbf{X}_{p} \defequal & \displaystyle  \argmin_{c_i,\textbf{x}_p^{(i)},i=1..|X_p|} ||g(\textbf{x}_{adv})-\sum_{i=1}^{|\textbf{X}_p|}c_jg(\textbf{x}_p^{(i)})||_2^2\\
+    s.t. & \displaystyle  \sum_{i=1}^{|\textbf{X}_p|} c_i=1 \\
+    & \forall 1\leq i\leq |\textbf{X}_p|: c_i > 0 \\
+    & \forall 1\leq i\leq |\textbf{X}_p|: ||\textbf{x}_p^{(i)} - \textbf{x}_{b}^{(i)}||_\infty \leq \epsilon
+\end{array}
+\end{equation}
+where $\sum_{i=1}^{|\textbf{X}_p|}c_jg(\textbf{x}_p^{(i)})$ is a convex combination of $g_{\text{FE}}(\textbf{x}_{p}^{(i)})$ such that the coefficients $\{c_j~|~j=1..|\textbf{X}_p|\}$ are positive and form a probability distribution (c.f. the first two constraints). Also, we have the third constraint which ensures that the poisoning samples are close to their respective base samples.   
+
+In the following, we have two heuristic approaches for backdoor attacks. Different from the poisoning attack, we do not have a target sample $\textbf{x}_{adv}$, but have a trigger/patch which will be added to the input instances. 
+
+\subsection*{Hidden Trigger Backdoor} Hidden trigger backdoor is similar with Feature Collision, except that the alignment of feature representation is not between $\textbf{x}_{p}^{(i)}$ and the target sample $\textbf{x}_{adv}$, but between $\textbf{x}_{p}^{(i)}$ and a patched training image from the target 
+class $y_{adv}$. Formally, 
+\begin{equation}
+    \textbf{x}_{p}^{(i)} = \argmin_{\textbf{x}} ||g_{\text{FE}}(\textbf{x})-g_{\text{FE}}(\tilde{\textbf{x}}_{adv}^{i})||_2^2 + \beta ||\textbf{x} - \textbf{x}_{b}^{(i)}||_2^2
+\end{equation}
+where $\tilde{\textbf{x}}_{adv}^{i}$ is patched training image from the target 
+class $y_{adv}$. 
+
+\subsection*{Clean Label Backdoor} Clean label backdoor proceeds in two steps. First, it generates an adversarial example $\tilde{\textbf{x}}_{adv}^{i}$ for each base sample. Second, it constructs ${\textbf{x}}_{adv}^{i}$ by adding a patch to $\tilde{\textbf{x}}_{adv}^{i}$. 
+
+
+\subsection{An Alternating Optimisation Method}
+
+As discussed in Section~\ref{sec:poisoningattackdefinition}, the data poisoning attack is a bi-level optimisation problem, which cannot be solved in a tractable way when the objective functions $\mathcal{L}_{adv}$ and $\mathcal{L}_{train}$ are non-convex. Algorithm~\ref{alg:datapoisoningalgorithm} presents an algorithm that solves the problem in an alternating optimisation way. Another method to solve the bi-level optimisation is discussed in \cite{236234}. 
+
+\begin{algorithm}[!htbp]
+\SetAlgoLined
+i $\leftarrow$ 0\\
+$\textbf{X}_{p}^i \leftarrow \textbf{X}_{p}$ \\ 
+$\textbf{W}^i$ $\leftarrow$ $\argmin_{\textbf{W}}\mathcal{L}_{train}(\textbf{X}\cup \textbf{X}_{p}^i,\textbf{y};\textbf{W})$, where $\textbf{y}$ includes labels for both $\textbf{X}$ and $ \textbf{X}_{p}^i$ \\
+$l^{i}\leftarrow \mathcal{L}_{adv}(\textbf{x}_{adv},y_{adv};\textbf{W}^i)$ \\
+\Repeat{
+$l^{i}-l^{i-1}< \epsilon$ 
+}{
+$\textbf{X}_{p}^{i+1}\leftarrow \emptyset$\\
+\For{$c = 1... |X_p|$}{
+$\textbf{x}_c^{i+1} \leftarrow line\_search(\textbf{x}_c^i, \nabla_{\textbf{x}_c}\mathcal{L}_{adv}(\textbf{x}_{adv},y_{adv};\textbf{W}^{i}))$\\
+$\textbf{X}_{p}^{i+1}\leftarrow \textbf{X}_{p}^{i+1} \cup \{\textbf{x}_c^{i+1}\}$
+}
+$\textbf{W}^{i+1} \leftarrow \argmin_{\textbf{W}}\mathcal{L}_{train}(\textbf{X}\cup \textbf{X}_{p}^{i+1},\textbf{y};\textbf{W}^i)$ \\
+$l^{i+1}\leftarrow \mathcal{L}_{adv}(\textbf{x}_{adv},y_{adv};\textbf{W}^{i+1})$\\
+$i \leftarrow i+1$
+}
+\Return the final $\textbf{X}_p^i$
+ \caption{$\functionname{PoisoningAttack}(\textbf{x}_{adv},y_{adv},\textbf{X}_p,\textbf{X},\mathcal{L}_{adv},\mathcal{L}_{train}, \epsilon)$, where $\textbf{x}_{adv}$ is the target input, $y_{adv}$ is the target label, $\textbf{X}_p$ is a set of initial poisoning samples, $\textbf{X}$ is the training dataset, $\mathcal{L}_{adv}(\textbf{x}_{adv},y_{adv};\textbf{W})$ is a function to measure the accuracy of predicting $\textbf{x}_{adv}$ as $y_{adv}$ with a neural network whose parameters are $\textbf{W}$,  $\mathcal{L}_{train}(\textbf{X},\textbf{y})$ is the standard training loss function, and $\epsilon>0$ is a threshold that will be used to determine the convergence. }
+ \label{alg:datapoisoningalgorithm}
+\end{algorithm}
+
+It repeats by first conducting a line search over the gradient $\nabla_{\textbf{x}_c}\mathcal{L}_{adv}(\textbf{x}_{adv},y_{adv};\textbf{W}^{i})$ for all candidate samples $\textbf{x}_c$ in $\textbf{X}_p$ (Line 7-10), and then conducting a standard training over the updated $\textbf{X}\cup\textbf{X}_p$ (Line 11). The algorithm terminates when the loss over the target input converges with respect to a pre-specified threshold $\epsilon$ (Line 14). Finally, it returns the set of updated poisoning samples (Line 15). 
+
+According to the above discussion, the key difficulty is on the computation of  \begin{equation}
+    \nabla_{\textbf{x}_c}\mathcal{L}_{adv}(\textbf{x}_{adv},y_{adv};\textbf{W}^{i})
+\end{equation}
+which depends not only on the input $\textbf{x}_c$ but also on the weight $\textbf{W}^i$. Therefore, we can apply the chain rule and get 
+\begin{equation}
+    \nabla_{\textbf{x}_c}\mathcal{L}_{adv}=\nabla_{\textbf{x}_c}\textbf{W}^T \cdot \nabla_{\textbf{W}} \mathcal{L}_{adv}
+\end{equation}
+where we have the weight $\textbf{W}$ depends on $\textbf{x}_c$. 
+
+It is noted that $\nabla_{\textbf{W}} \mathcal{L}_{adv}$ can be obtained through the neural network $f_{\textbf{W}}$ over the loss $\mathcal{L}_{adv}$. In the following, we explain how to compute $\nabla_{\textbf{x}_c}\textbf{W}^T$. To do so, we require that $\nabla_{\textbf{W}}\mathcal{L}_{train}(\textbf{X}\cup \textbf{X}_p,\textbf{y}; \textbf{W})=0$, according to the Karush-Kuhn-Tucker (KKT) equilibrium conditions, and further such conditions to remain valid while updating $\textbf{x}_c$, i.e., 
+\begin{equation}
+    \nabla_{\textbf{x}_c}(\nabla_{\textbf{W}}\mathcal{L}_{train}(\textbf{X}\cup \textbf{X}_p,\textbf{y}; \textbf{W})) = 0
+\end{equation}
+Through the application of chain rule on the above equation, we have 
+\begin{equation}
+    \nabla_{\textbf{x}_c}\nabla_{\textbf{W}}\mathcal{L}_{train} + \nabla_{\textbf{x}_c}\textbf{W}^T\cdot \nabla_{\textbf{W}}^2 \mathcal{L}_{train} = 0
+\end{equation}
+Therefore, we have
+\begin{equation}
+    \nabla_{\textbf{x}_c}\textbf{W}^T=-\nabla_{\textbf{x}_c}\nabla_{\textbf{W}}\mathcal{L}_{train}(\nabla_{\textbf{W}}^2 \mathcal{L}_{train})^{-1}
+\end{equation}
+where $\nabla_{\textbf{W}}\mathcal{L}_{train}$ is obtained from the neural network $f_{\textbf{W}}$ over the loss $\mathcal{L}_{train}$. 
+
+

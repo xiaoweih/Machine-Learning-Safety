@@ -1,0 +1,91 @@
+\newpage
+\chapter{Loss Function and Gradient Descent}
+
+Before proceeding to deep learning, we use this section to discuss two key concepts: loss function and gradient descent. Technically, machine learning is to optimise a certain loss function over a set of training instances. A carefully designed loss function can significantly improve the performance of the trained model. A recent trend in machine learning research -- as we will explain later in Part~\ref{chap:verification} -- also designs loss functions to integrate safety properties. 
+Once the loss function is designed, it is of our interest to find an optimal solution (i.e., a trained model) with respect to the loss function. However, the optimal solution might not be easily achievable, in particular for high-dimensional problems and/or for  machine learning models with many parameters. 
+%Most machine learning algorithms involve optimisation, and 
+In this case, 
+gradient descent (and its variant such as stochastic gradient descent) is an effective method to find sub-optimal, yet often satisfactory, solutions. This chapter introduces the basic ideas of both loss function and gradient descent, and explains how they are applied to the case of linear regression. 
+
+\input{RegularisedTraining/loss}
+
+
+\section{Gradient Descent}
+
+\subsection*{Derivative of a function}
+
+Given a function $\hat{L}({x})$, its derivative is the slope of $\hat{L}({x})$ at point ${x}$, written as $\hat{L}'({x})$. It specifies how to scale a small change in input to obtain a corresponding change in the output. Specifically, 
+\begin{equation}
+    \hat{L}({x}+\epsilon) \approx \hat{L}({x}) + \epsilon \hat{L}'({x})
+\end{equation}
+
+Moreover, define the sign function as the following: 
+\begin{equation}
+    sign(x) = 
+    \begin{cases}
+    -1 & \text{if }x < 0 \\
+    0 & \text{if }x = 0 \\
+    1 & \text{otherwise} 
+    \end{cases}
+\end{equation}
+Then, we have that 
+\begin{equation}
+    \hat{L}({x}-\epsilon sign(\hat{L}'({x}))) < \hat{L}({x})
+\end{equation}
+Therefore, we can reduce $\hat{L}({x})$  by moving ${x}$ in small steps with an opposite sign of derivative.  
+
+\subsection*{Gradient}
+
+Gradient generalizes notion of derivative where derivative is with respect to a vector. 
+\begin{equation}
+    \nabla_{\textbf{x}}(\hat{L}(\textbf{x})) = (\frac{{\partial \hat{L}(\textbf{x})}}{{\partial x_1}},...,\frac{{\partial \hat{L}(\textbf{x})}}{{\partial x_n}})
+\end{equation}
+where the partial derivative $\displaystyle \frac{{\partial \hat{L}(\textbf{x})}}{{\partial x_i}}$ measures how the function $\hat{L}$ changes when only variable $x_i$ increases at point $\textbf{x}$.  
+
+\subsection*{Critical points}  are where every element of the gradient is equal to zero, i.e., 
+\begin{equation}
+    \nabla_{\textbf{x}}(\hat{L}(\textbf{x})) = 0 \equiv 
+    \begin{cases}
+    \displaystyle\frac{{\partial \hat{L}(\textbf{x})}}{{\partial x_1}} = 0 \\
+    ... \\
+    \displaystyle\frac{{\partial \hat{L}(\textbf{x})}}{{\partial x_n}} = 0\\
+    \end{cases}
+\end{equation}
+
+
+\subsection*{Gradient descent on linear regression}
+
+Given Equation (\ref{equ:linearregression2}), we have that 
+\begin{equation}\label{equ:gradientlinearregression}
+    \begin{array}{cl}
+         & \nabla_{\textbf{w}}\hat{L}(f_{\textbf{w}}) \\
+        = &  \nabla_{\textbf{w}}\frac{1}{m} ||\textbf{X}\textbf{w} - \textbf{y}||_2^2 \\
+        = & \nabla_{\textbf{w}}[(\textbf{X}\textbf{w} - \textbf{y})^T(\textbf{X}\textbf{w} - \textbf{y})]\\
+        = & \nabla_{\textbf{w}}[\textbf{w}^T\textbf{X}^T\textbf{X}\textbf{w}-2\textbf{w}^T\textbf{X}^T\textbf{y}+\textbf{y}^T\textbf{y}]\\
+         = & 2 \textbf{X}^T\textbf{X}\textbf{w} - 2 \textbf{X}^T\textbf{y}
+    \end{array}
+\end{equation}
+Therefore, we can follow the following gradient descent algorithm to solve linear regression: 
+\begin{enumerate}
+    \item Set step size $\epsilon$ and tolerance $\delta$ to small positive numbers
+    \item While $|| \textbf{X}^T\textbf{X}\textbf{w} -  \textbf{X}^T\textbf{y}||_2 > \delta$ do \begin{equation}
+        \textbf{x} \leftarrow \textbf{x} - \epsilon(\textbf{X}^T\textbf{X}\textbf{w} -  \textbf{X}^T\textbf{y})
+    \end{equation}
+    \item Return $\textbf{x}$ as a solution
+\end{enumerate}
+
+
+\subsection*{Analytical solution on linear regression}
+
+We may be able to avoid iterative algorithm and jump to the critical point by solving the following equation for $\textbf{x}$: 
+\begin{equation}
+    \nabla_{\textbf{w}}\hat{L}(f_{\textbf{w}}) = 0
+\end{equation}
+By Equation (\ref{equ:gradientlinearregression}), we have that 
+\begin{equation}
+     \textbf{X}^T\textbf{X}\textbf{w} -  \textbf{X}^T\textbf{y} = 0
+\end{equation}
+That is, 
+\begin{equation}
+    \textbf{w} = (\textbf{X}^T\textbf{X})^{-1}\textbf{X}^T\textbf{y}
+\end{equation}

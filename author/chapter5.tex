@@ -1,0 +1,20 @@
+%\chapter{Enhancement to Robustness and Generalization}\label{chap:advtraining}
+
+\chapter{Enhancement to Safety and Security of Deep Learning}\label{chap:advtraining}
+
+Significant efforts from the research community have been spent on studying various methods to enhance either the training process or a trained model to mitigate the identified safety risks. In this chapter, we present three representative examples from three categories of techniques. They are designed to deal with different safety risks: robustness, generalisation, and privacy, respectively.  
+%
+The first category of techniques (Section~\ref{sec:advtrainingsection}), called adversarial training, is to improve the robustness. While there are many different approaches for the improvement of robustness, adversarial training is shown to be the most successful one. We will re-cap the typical min-max formalism of adversarial training, and then discuss some state-of-the-art training techniques. 
+%
+The second category of techniques (Section~\ref{chap:generalisationPAC}) is to improve the generalisation ability of a trained neural network. The technique presented, based on PAC Bayesian theory, utilises the weight correlation -- a novel concept that measures the correlation between weights of the same layer -- for training. 
+%
+The third category of techniques (Section~\ref{sec:privacyenhancementsec}) is to improve the privacy-related properties, such as membership inference, model stealing, and model inversion. They are based on differential privacy, and add random noise into either the training process or the inference stage. 
+
+\input{Adversarial_Training/minmax}
+
+\input{Adversarial_Training/generalisation}
+
+\input{Adversarial_Training/differentialPrivacy}
+
+
+\input{RobustnessVerification/exercises}

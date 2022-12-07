@@ -1,0 +1,324 @@
+% -*- coding: utf-8 -*-
+\newcommand{\dnnfunction}{\phi}
+\newcommand{\rnnfunction}{\psi}
+\newcommand{\covered}[3]{{#1}_{#2}#3}
+\newcommand{\valuefunction}{g}
+\newcommand{\featureactivation}{a}
+\newcommand{\neuronpair}{\alpha}
+\newcommand{\feature}{\psi}
+\newcommand{\features}{\Psi}
+\newcommand{\neuronpairs}{\mathsf{O}}
+\newcommand{\testsuite}{\mathcal{T}}
+\newcommand\testsuites{\ensuremath{\mathcal{T}}\xspace}
+\newcommand{\distance}[2]{ ||#1||_{#2}}
+\newcommand{\powerset}[1]{{\cal P}(#1)}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\nat}{\mathbb{N}}
+
+\newcommand{\sequence}[1]{\mathtt{#1}}
+\newcommand{\metric}{M}
+\newcommand{\network}{{\cal N}\xspace}
+\newcommand{\requirement}{{\cal R}}
+\newcommand{\assertmethod}{{\cal A}}
+
+\newcommand{\sigmoid}{\sigma}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+
+\usepackage{xifthen}% provides \isempty test
+\newcommand\lambdaone[1]{\ensuremath{\ifthenelse{\isempty{#1}}{}{（#1）}}}
+\newcommand\lambdatwo[2]{\ensuremath{\ifthenelse{\isempty{#1#2}}{}{（#1, #2）}}}
+% \newcommand{\Dom}[1]{\ensuremath{\operatorname{Dom}\lambdaone{#1}}\xspace}
+% \newcommand{\Codom}[1]{\ensuremath{\operatorname{Codom}\lambdaone{#1}}\xspace}
+\newcommand{\Dom}[1]{\ensuremath{\mathsf{Dom}\lambdaone{#1}}\xspace}
+\newcommand{\Codom}[1]{\ensuremath{\mathsf{Codom}\lambdaone{#1}}\xspace}
+% \newcommand{\Dom}[1]{\ensuremath{\mathsf{Dom}_{#1}}\xspace}
+% \newcommand{\Codom}[1]{\ensuremath{\mathsf{Codom}_{#1}}\xspace}
+
+\newcommand{\inputdomain}{\ensuremath{\DD_X}\xspace}
+\newcommand{\outputdomain}{\ensuremath{\DD_Y}\xspace}
+\newcommand\layerdom[1]{\ensuremath{\LL_{#1}}\xspace}
+\newcommand\featdom[1]{\ensuremath{\FF_{#1}}\xspace}
+\newcommand\featcomp[2]{\ensuremath{\FF_{{#1},{#2}}}\xspace}
+
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{definition}{Definition}
+
+\newcommand{\param}[1]{\texttt{#1}}
+% \newcommand{\num}[2]{$#1$$,$$#2$}
+
+\newcommand{\xiaowei}[1]{{\color{blue}#1}}
+\newcommand{\sven}[1]{{\color{blue}sven: #1}}
+\newcommand{\gaojie}[1]{{\color{green}#1}}
+
+% Custom inline notes
+% \newcommand{\note}[2][]{\todo[color=green!20,caption={rem}, #1]{%
+%     #2}}
+\newcommand{\inote}[2][]{\todo[inline,color=green!20,caption={2do}, #1]{%
+    \begin{minipage}{\textwidth-4pt}#2\end{minipage}}}
+\newcommand{\itodo}[2][]{\todo[inline,caption={2do}, #1]{%
+    \begin{minipage}{\textwidth-4pt}#2\end{minipage}}}
+
+\addtolength\marginparwidth{1.1cm}
+\newcommand{\nb}[2][]{\todo[color=green!20,caption={rem}, #1]{%
+    NB: #2}}
+\newcommand{\nbtodo}[2][]{\todo[#1]{%
+    NB: #2}}
+\newcommand{\js}[2][]{\todo[color=blue!20,caption={rem}, #1]{%
+    JS: #2}}
+
+\newcommand{\red}[1]{{\leavevmode\color{red}#1}\xspace}%
+\newcommand{\nberth}[1]{{\leavevmode\color{green!50!black}#1}\xspace}%
+\newcommand{\removable}[1]{{\leavevmode\color{teal}#1}\xspace}%
+\newenvironment{redenv}{\color{red}}{}
+\newenvironment{greenenv}{\color{green}}{}
+
+\newcommand{\adhoc}		{{\itshape	 ad hoc\/}\xspace}
+\newcommand{\afortiori}		{{\itshape   a fortiori\/}\xspace}
+\newcommand{\aka}		{{\itshape	    aka\/}\xspace}
+\newcommand{\aposter}		{{\itshape a posteriori\/}\xspace}
+\newcommand{\apriori}		{{\itshape     a priori\/}\xspace}
+\newcommand{\cf}		{{\itshape	      cf.}\xspace}
+\newcommand{\vs}		{{\itshape	       vs}\xspace}
+\newcommand{\defacto}		{{\itshape     de facto\/}\xspace}
+\newcommand{\eg}		{{\itshape	    e.g.,}\xspace}
+\newcommand{\idem}		{{\itshape	   idem\/}\xspace}
+\newcommand{\modulo}		{{\itshape	 modulo\/}\xspace}
+\newcommand{\ie}		{{\itshape	    i.e.,}\xspace}
+\newcommand{\perse}		{{\itshape	   per se}\xspace}
+\newcommand{\wrt}		{{\itshape	   w.r.t.}\xspace}
+\newcommand{\st}		{{\itshape	    s.t\/}\xspace}
+
+\newcommand{\DeepConcolic}{\textsf{DeepConcolic}\xspace}
+\newcommand{\TestRNN}{\textsf{TestRNN}\xspace}
+\newcommand{\EKiML}{\textsf{EKiML}\xspace}
+\newcommand{\GUAP}{\textsf{GUAP}\xspace}
+
+\newcommand\deepconcolic{\DeepConcolic}
+\newcommand\testRNN{\TestRNN}
+\newcommand\testrnn{\TestRNN}
+\newcommand\ekiml{\EKiML}
+
+\newcommand\dbnabstr{\texttt{dbnabstr}\xspace}
+
+\renewcommand\L{\ensuremath{\mathcal L}\xspace}%
+\renewcommand\P{\ensuremath{\mathcal P}\xspace}%
+\newcommand\A{\ensuremath{\mathcal A}\xspace}%
+\newcommand\B{\ensuremath{\mathcal B}\xspace}%
+\newcommand\C{\ensuremath{\mathcal C}\xspace}%
+%\newcommand\D{\ensuremath{\mathcal D}\xspace}%
+\newcommand\F{\ensuremath{\mathcal F}\xspace}%
+\newcommand\G{\ensuremath{\mathcal G}\xspace}%
+%\newcommand\I{\ensuremath{\mathcal I}\xspace}%
+\newcommand\K{\ensuremath{\mathcal K}\xspace}%
+\newcommand\N{\ensuremath{\mathcal N}\xspace}%
+\newcommand\Q{\ensuremath{\mathcal Q}\xspace}%
+\newcommand\R{\ensuremath{\mathcal R}\xspace}%
+\newcommand\T{\ensuremath{\mathcal T}\xspace}%
+\newcommand\Z{\ensuremath{\mathcal Z}\xspace}%
+\newcommand\BB{\ensuremath{\mathbb B}\xspace}%
+\newcommand\DD{\ensuremath{\mathbb D}\xspace}%
+\newcommand\FF{\ensuremath{\mathbb F}\xspace}%
+\newcommand\GG{\ensuremath{\mathbb G}\xspace}%
+\newcommand\HH{\ensuremath{\mathbb H}\xspace}%
+\newcommand\LL{\ensuremath{\mathbb L}\xspace}%
+\newcommand\RR{\ensuremath{\mathbb R}\xspace}%
+\newcommand\Ls{\ensuremath{\mathscr L}\xspace}%
+
+
+\newcommand{\context}{{\cal C}}
+\newcommand{\contexts}{{\tt C}}
+\newcommand\Layers{\ensuremath{\mathsf{Layers}}\xspace}
+\newcommand\layer[1]{\ensuremath{l_{#1}}\xspace}
+\newcommand{\networks}{{\tt N}}
+\newcommand\Features[1]{\ensuremath{Λ% \mathsf{Features}
+    _{#1}}\xspace}
+
+\newcommand{\dist}{{\cal D}}
+
+\newcommand{\dimension}{h}
+\newcommand\lowdim[1]{\ensuremath{|Λ_{#1}|}\xspace}
+
+% \newcommand\DiscrFeatsSpace[1]{\ensuremath{\L^{♯}_{#1}}\xspace}
+\newcommand\DiscrFeatsSpace[1]{\ensuremath{\FF^{♯}_{#1}}\xspace}
+% \newcommand\DiscrFeatsElt[1]{\ensuremath{\Ls^{♯}_{#1}}\xspace}
+\newcommand\DiscrFeatsElt[1]{\ensuremath{F^{♯}_{#1}}\xspace}
+\newcommand\AllSubFeatSpaces[1]{\ensuremath{\FF^{♯}_{#1}}\xspace}
+
+% \newcommand\Subfeatspaces[2]{\ensuremath{Λ^{♯}_{#1,#2}}\xspace}
+\newcommand\Subfeatspaces[2]{\ensuremath{\FF^{♯}_{#1,#2}}\xspace}
+\newcommand\subfeatspace[3]{\ensuremath{f^{♯#3}_{#1,#2}}\xspace}
+\newcommand\subfeatlb[3]{\ensuremath{f^{[#3}_{#1,#2}}\xspace}
+\newcommand\subfeatub[3]{\ensuremath{f^{#3[}_{#1,#2}}\xspace}
+% \newcommand\featsubsp[2]{\ensuremath{ℓ^{♯}_{#1,#2}}\xspace}
+\newcommand\featsubsp[2]{\ensuremath{\mathsf{Discr}^{♯}_{#1,#2}}\xspace}
+% \newcommand\subfeatlb[3]{\ensuremath{\left\lfloor\subfeatspace#1#2#3\right\rfloor}\xspace}
+% \newcommand\subfeatlb[3]{\ensuremath{\subfeatspace#1#2{#3[}}\xspace}
+
+\renewcommand\P[1]{\ensuremath{\mathrm{Pr}\!\left(#1\right)}\xspace}
+
+% TMP: latent/hidden features
+\newcommand\LF[1][h]{#1idden feature\xspace}
+\newcommand\LFs[1][h]{#1idden features\xspace}
+\newcommand\LFI[1][h]{#1idden feature interval\xspace}
+\newcommand\LFIs[1][h]{#1idden feature intervals\xspace}
+\newcommand\HF[1][h]{#1idden feature\xspace}
+\newcommand\HFs[1][h]{#1idden features\xspace}
+\newcommand\HFI[1][h]{#1idden feature interval\xspace}
+\newcommand\HFIs[1][h]{#1idden feature intervals\xspace}
+
+
+% from BN paper:
+\newcommand\BNaStructure[1]{\ensuremath{\B_{#1}}\xspace}%
+\newcommand\BNa[2]{\ensuremath{\B_{#1,#2}}\xspace}%
+\let\BN=\BNa
+\newcommand\BNode[2]{\ensuremath{⦇f^{♯}_{#1,#2}⦈}\xspace}%
+\newcommand\IPr[2]{\ensuremath{\mathcal{IP}\!（{#2}）}\xspace}%
+\newcommand\CPr[4]{\ensuremath{\mathcal{CP\!}_{#1}\!（{#3}｜#4）}\xspace}%
+\newcommand\MPr[2]{\ensuremath{\mathcal{P}\!_{#1}{（#2）}}\xspace}%
+\newcommand\BNFCov[2]{\ensuremath{\mathrm{BFCov}（\BNa{#1}{#2}）}\xspace}%
+\newcommand\BNFdCov[2]{\ensuremath{\mathrm{BFdCov}（\BNa{#1}{#2}）}\xspace}%
+\newcommand\BNFxCov[2]{\ensuremath{\mathrm{BFxCov}（\BNa{#1}{#2}）}\xspace}%
+
+
+\newcommand\Nms{\ensuremath{\N_{\mathsf{ms}}}\xspace}%
+
+%\newcommand{\realnumber}{\mathcal{R}}
+\newcommand{\labels}{\mathcal{L}}
+
+%
+\newcommand\Nmx{\ensuremath{\N_{\mathsf{mx}}}\xspace}%
+
+\newcommand\Minimise[2][]{\ensuremath{\mathit{Minimise}（#2）}\xspace}%
+\newcommand\Target[1]{\ensuremath{\mathit{Target}（#1）}\xspace}%
+\newcommand\Constr[2][]{\ensuremath{\mathit{Constr}_{#1}（#2）}\xspace}%
+\newcommand\Replic[2]{\ensuremath{\mathit{Replic}_{#1}（#2）}\xspace}%
+\newcommand\LInf[2]{\ensuremath{\|#1 - #2\|_{∞}}\xspace}%
+
+% ---
+
+
+
+% tuto part:
+
+\newcommand\Xtrain{\ensuremath{X_{\mathit{train}}}\xspace}%
+\newcommand\Ytrain{\ensuremath{Y_{\mathit{train}}}\xspace}%
+\newcommand\Xtest{\ensuremath{X}\xspace}%
+\newcommand\Ytest{\ensuremath{Y}\xspace}%
+
+\newcommand\dthr{\ensuremath{d_{\mathrm{thr}}}\xspace}%
+\newcommand\dminHard{\ensuremath{d_{\min}}\xspace}%
+\newcommand\dminNoise{\ensuremath{d_{\min}^+}\xspace}%
+
+% \newcommand\Nfm{\ensuremath{\N_{\mathsf{FM}}}\xspace}%
+% \newcommand\Nfm{\lstinline[language=sh,basicstyle=\ttfamily\small]%
+%   {fashion\_mnist\_medium.h5}\xspace}%
+% \newcommand\Nhar{\ensuremath{\N_{\mathsf{HAR}}}\xspace}%
+\newcommand\Nhs{\lstinline[language=sh,basicstyle=\ttfamily\small]%
+  {har_dense.h5}\xspace}%
+\newcommand\Nhl{\lstinline[language=sh,basicstyle=\ttfamily\small]%
+  {har_conv2d.h5}\xspace}%
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\newcommand{\functionname}[1]{\textbf{\textit{#1}}}
+\newcommand{\humanoracle}{h}
+
+%\newtheorem{definition}{Definition}
+%\newtheorem{example}{Example}
+%\newtheorem{theorem}{Theorem}
+\newtheorem{newquestion}{Question}
+%\newtheorem*{answer*}{Answer}
+\newtheorem{newanswer}{Answer}
+
+
+%\DeclareMathOperator*{\argmax}{argmax} % thin space, limits underneath in displays
+%\DeclareMathOperator*{\argmin}{argmin} % thin space, limits underneath in displays
+
+\makeatletter
+\newcommand{\xMapsto}[2][]{\ext@arrow 0599{\Mapstofill@}{#1}{#2}}
+\def\Mapstofill@{\arrowfill@{\Mapstochar\Relbar}\Relbar\Rightarrow}
+\makeatother
+
+\newcommand{\dsep}{\text{d-sep}}
+
+
+\DeclareRobustCommand{\bbone}{\text{\usefont{U}{bbold}{m}{n}1}}
+\DeclareMathOperator{\EX}{\mathbb{E}}
+
+
+\newcommand{\pre}{pre}
+\newcommand{\con}{con}
+
+
+\newcommand{\layers}{\mathbb{S}}
+\newcommand{\layerConnections}{\mathbb{T}}
+\newcommand{\domains}{D}
+
+
+\usepackage{stackengine}
+\def\defequal{\mathrel{\ensurestackMath{\stackon[1pt]{=}{\scriptscriptstyle\Delta}}}}
+
+
+\newboolean{notincludedinbook}
+\setboolean{notincludedinbook}{true}
+\ifthenelse{\boolean{notincludedinbook}}
+{% True case
+    \newcommand{\notincludedinbook}[1]{}
+}
+  {% false case
+   \newcommand{\notincludedinbook}[1]{#1}%
+  }
+
+
+\newboolean{noexercises}
+\setboolean{noexercises}{true}
+\ifthenelse{\boolean{noexercises}}
+{% True case
+    \newcommand{\noexercises}[1]{}
+}
+  {% false case
+   \newcommand{\noexercises}[1]{#1}%
+  }
+
+
+\newcommand{\setofcoveringmethods}{\mathsf{F}}
+\newcommand{\coveringmethod}{cov}
+\newcommand{\testobjectives}{obj}
+\newcommand{\requirements}{\mathcal{R}}
+
+\newcommand{\realnumber}{\mathbb{R}}
+
+\newcommand{\eventually}{\Diamond}
+
+%\newtheorem{lemma}{Lemma}
+
+% Local variables:
+% TeX-master: "main"
+% End:

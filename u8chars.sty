@@ -1,0 +1,347 @@
+% -*- coding: utf-8 -*-
+% -------------------------------------------------------------------------------
+% Author: Nicolas Berthier
+% Last modified: Thu Oct 22 22:50:02 2020
+%
+% Basic LaTeX package allowing to type utf-8 characters directly in source files
+% (both in text and math modes).
+% -------------------------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{u8chars}[2014/03/01 v1.2 Making LaTeX understand some
+utf-8 characters]
+
+\RequirePackage{newunicodechar}
+\RequirePackage{stmaryrd}       %for some brackets
+\RequirePackage{mathtools}      % May break stuffs like arrows!
+% \RequirePackage{amsmath}        %for the \text{...} macro
+\RequirePackage{amssymb}        %for the \varnothing and \thicksim macro
+% \RequirePackage{eufrak}         %for fraktur characters
+
+% Declaring and handling options:
+
+\newif\if@boldsymbols
+\@boldsymbolsfalse
+\DeclareOption{boldsymbols}{\@boldsymbolstrue}
+\DeclareOption{normalsymbols}{\@boldsymbolsfalse}
+
+\newif\if@rawdef
+\@rawdeffalse
+\DeclareOption{rawdefs}{\@rawdeftrue}
+\DeclareOption{norawdefs}{\@rawdeffalse}
+
+\newif\if@scrcursives
+\@scrcursivesfalse
+\DeclareOption{scr}{\@scrcursivestrue}
+\DeclareOption{noscr}{\@scrcursivesfalse}
+
+\newif\if@stix
+\@stixfalse
+\DeclareOption{stix}{\@stixtrue}
+\DeclareOption{nostix}{\@stixfalse}
+
+\newif\if@MnSymbols
+\@MnSymbolsfalse
+\DeclareOption{MnSymbols}{\@MnSymbolstrue}
+\DeclareOption{noMnSymbols}{\@MnSymbolsfalse}
+
+\ProcessOptions\relax
+
+% Late package loading.
+
+\if@scrcursives
+\RequirePackage{mathrsfs}
+\global\def\mymaybescr#1{\ensuremath{\mathscr#1}}
+\else
+\global\def\mymaybescr#1{\ensuremath{\mathcal#1}}
+\fi
+
+\if@stix
+\RequirePackage{stix}
+\else
+\RequirePackage{scalerel}       %for ≋
+\RequirePackage{stackengine}
+\fi
+
+% Code:
+
+\if@boldsymbols         % Make some math symbols wider, when possible.
+\global\def\mybld#1{\ensuremath{\boldsymbol#1}}
+\global\def\mybldrel#1{\ensuremath{\mathrel{\boldsymbol#1}}}
+\global\def\mybldbin#1{\ensuremath{\mathbin{\boldsymbol#1}}}
+\else
+\global\def\mybld#1{\ensuremath#1}
+\global\def\mybldrel#1{\ensuremath{\mathrel{#1}}}
+\global\def\mybldbin#1{\ensuremath{\mathbin{#1}}}
+\fi
+
+% NB: See raw definitions below… those latin-1 need special care in
+% some circumstances:
+%
+\newunicodechar{ }{~}                        % 00A0
+\newunicodechar{¬}{\mybld\neg}               % 00AC
+\newunicodechar{×}{\mybldbin\times}          % 00D7
+\newunicodechar{​}{\mbox{}}
+
+\newunicodechar{Γ}{\ensuremath{\Gamma}}      % 0393
+\newunicodechar{Δ}{\ensuremath{\Delta}}      % 0394
+\newunicodechar{Θ}{\ensuremath{\Theta}}      % 0398
+\newunicodechar{Λ}{\ensuremath{\Lambda}}     % 039B
+\newunicodechar{Ξ}{\ensuremath{\Xi}}         % 039E
+\newunicodechar{Π}{\ensuremath{\Pi}}         % 03A0
+\newunicodechar{Σ}{\ensuremath{\Sigma}}      % 03A3
+\newunicodechar{Υ}{\ensuremath{\Upsilon}}    % 03A5
+\newunicodechar{Φ}{\ensuremath{\Phi}}        % 03A6
+\newunicodechar{Ψ}{\ensuremath{\Psi}}        % 03A8
+\newunicodechar{Ω}{\ensuremath{\Omega}}      % 03A9
+\newunicodechar{α}{\ensuremath{\alpha}}      % 03B1
+\newunicodechar{β}{\ensuremath{\beta}}       % 03B2
+\newunicodechar{γ}{\ensuremath{\gamma}}      % 03B3
+\newunicodechar{δ}{\ensuremath{\delta}}      % 03B4
+\newunicodechar{ε}{\ensuremath{\varepsilon}} % 03B5
+\newunicodechar{ζ}{\ensuremath{\zeta}}       % 03B6
+\newunicodechar{η}{\ensuremath{\eta}}        % 03B7
+\newunicodechar{θ}{\ensuremath{\theta}}      % 03B8
+\newunicodechar{ι}{\ensuremath{\iota}}       % 03B9
+\newunicodechar{κ}{\ensuremath{\kappa}}      % 03BA
+\newunicodechar{λ}{\ensuremath{\lambda}}     % 03BB
+\newunicodechar{μ}{\ensuremath{\mu}}         % 03BC
+\newunicodechar{ν}{\ensuremath{\nu}}         % 03BD
+\newunicodechar{ξ}{\ensuremath{\xi}}         % 03BE
+\newunicodechar{π}{\ensuremath{\pi}}         % 03BC
+\newunicodechar{ρ}{\ensuremath{\rho}}        % 03C1
+\newunicodechar{σ}{\ensuremath{\sigma}}      % 03C3
+\newunicodechar{τ}{\ensuremath{\tau}}        % 03C4
+\newunicodechar{υ}{\ensuremath{\upsilon}}    % 03C5
+\newunicodechar{φ}{\ensuremath{\varphi}}     % 03C6
+\newunicodechar{χ}{\ensuremath{\chi}}        % 03C7
+\newunicodechar{ψ}{\ensuremath{\psi}}        % 03C8
+\newunicodechar{ω}{\ensuremath{\omega}}      % 03C9
+\newunicodechar{ϑ}{\ensuremath{\vartheta}}   % 03D1
+\newunicodechar{ϕ}{\ensuremath{\phi}}        % alternative phi
+
+\newunicodechar{…}{\ldots}                   % 2026
+\newunicodechar{ℍ}{\ensuremath{\mathbb{H}}}
+\newunicodechar{ℓ}{\mybld\ell}               % 2113
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}  % 2115
+\newunicodechar{℘}{\ensuremath{\mybld{\wp}}} % 2118
+\newunicodechar{ℙ}{\ensuremath{\mathbb{P}}}
+\newunicodechar{ℚ}{\ensuremath{\mathbb{Q}}}  % 211A
+\newunicodechar{ℝ}{\ensuremath{\mathbb{R}}}  % 211D
+\newunicodechar{ℤ}{\ensuremath{\mathbb{Z}}}  %
+\newunicodechar{←}{\mybld\leftarrow}       % 2190
+\newunicodechar{↑}{\mybld\uparrow}         %
+\newunicodechar{→}{\mybld\rightarrow}      % 2192
+\newunicodechar{↓}{\mybld\downarrow}       %
+\newunicodechar{⇀}{\mybld\rightharpoonup}
+\newunicodechar{⇐}{\mybld\Leftarrow}       % 21D0
+\newunicodechar{⇒}{\mybld\Rightarrow}      % 21D2
+\newunicodechar{⇔}{\mybld\Leftrightarrow}  % 21D4
+\newunicodechar{∀}{\mybld\forall}          % 2200
+\newunicodechar{∁}{\mybld\complement}
+\newunicodechar{∃}{\mybld\exists}          % 2203
+\newunicodechar{∄}{\mybld\nexists}         % 2204
+\newunicodechar{∅}{\mybld\varnothing}      % 2205
+\newunicodechar{∇}{\mybld\nabla}
+\newunicodechar{∈}{\mybld\in}              % 2208
+\newunicodechar{∉}{\mybld\notin}           % 2209
+\newunicodechar{∏}{\prod}                  %
+\newunicodechar{∑}{\sum}                   %
+\newunicodechar{−}{\mybldbin-}
+\newunicodechar{∖}{\mybld\setminus}        %
+\newunicodechar{∘}{\ensuremath{\circ}}     % 2218
+\newunicodechar{∙}{\mybld\bullet}          % 2219
+\newunicodechar{∞}{\mybld\infty}           % 221E
+\newunicodechar{∥}{\mybld\|}               %
+\newunicodechar{∧}{\mybldbin\wedge}           % 2227
+\newunicodechar{∨}{\mybldbin\vee}             % 2228
+\newunicodechar{∩}{\mybldbin\cap}             % 2229
+\newunicodechar{∪}{\mybldbin\cup}             % 222A
+\newunicodechar{∼}{\mybldrel\sim}             % (XXX: amssymb's \thicksim?)
+\newunicodechar{≈}{\mybldrel\approx}          % 2248
+\newunicodechar{≠}{\mybldrel\neq}             %
+\newunicodechar{≡}{\mybldrel\equiv}           %
+\newunicodechar{⋈}{\mybldrel\bowtie}       %
+% \newunicodechar{≤}{\mybldrel\leqslant}        % 2264
+% \newunicodechar{≥}{\mybldrel\geqslant}        % 2265
+\newunicodechar{≤}{\mybldrel\leq}        % 2264
+\newunicodechar{≥}{\mybldrel\geq}        % 2265
+\newunicodechar{≺}{\mybldrel\prec}            %
+\newunicodechar{≻}{\mybldrel\succ}            %
+\newunicodechar{⊂}{\mybldrel\subset}          %
+\newunicodechar{⊃}{\mybldrel\supset}          %
+\newunicodechar{⊆}{\mybldrel\subseteq}        %
+\newunicodechar{⊇}{\mybldrel\supseteq}        %
+\newunicodechar{⊎}{\mybldbin\uplus}           %
+\newunicodechar{⊏}{\mybldrel\sqsubset}        %
+\newunicodechar{⊐}{\mybldrel\sqsupset}        %
+\newunicodechar{⊑}{\mybldrel\sqsubseteq}      %
+\newunicodechar{⊒}{\mybldrel\sqsupseteq}      %
+\newunicodechar{⊓}{\mybldbin\sqcap}           % 2293
+\newunicodechar{⊔}{\mybldbin\sqcup}           % 2294
+\newunicodechar{⊕}{\mybldbin\oplus}           % 2295
+\newunicodechar{⊖}{\mybldbin\ominus}          %
+\newunicodechar{⊗}{\mybldbin\otimes}          % 2297
+\newunicodechar{⊤}{\mybld\top}             % 22A4
+\newunicodechar{⊥}{\mybld\bot}             % 22A5
+\newunicodechar{⊢}{\mybldrel\vdash}
+\newunicodechar{⊣}{\mybldrel\dashv}
+\newunicodechar{⊩}{\mybldrel\Vdash}
+\newunicodechar{⊨}{\mybldrel\models}          % 22A8
+\newunicodechar{⊭}{\mybldrel\not\models}      %
+\newunicodechar{⋀}{\bigwedge}              %
+\newunicodechar{⋁}{\bigvee}                %
+\newunicodechar{⋂}{\bigcap}                %
+\newunicodechar{⋃}{\bigcup}                %
+\newunicodechar{⋅}{\mybld\cdot}            % 22C5
+\newunicodechar{⋐}{\mybldrel\Subset}          %
+\newunicodechar{⋖}{\mybldrel\lessdot}         %
+\newunicodechar{⋗}{\mybldrel\gtrdot}          %
+% \newunicodechar{≼}{\mybldrel???}         %
+% \newunicodechar{≽}{\mybldrel???}          %
+\newunicodechar{⪯}{\mybldrel\preceq}         %
+\newunicodechar{⪰}{\mybldrel\succeq}          %
+\newunicodechar{⋯}{\mybld\cdots}           %
+\newunicodechar{≔}{\mybldrel{{\vcentcolon}{=}}}
+\newunicodechar{⩴}{\mybldrel{{\vcentcolon\vcentcolon}{=}}}
+\newunicodechar{〈}{\mybld\langle}         %
+\newunicodechar{〉}{\mybld\rangle}         %
+\newunicodechar{⟅}{\mybld\lbag}            %
+\newunicodechar{⟆}{\mybld\rbag}            %
+\newunicodechar{⟦}{\mybld\llbracket}       %
+\newunicodechar{⟧}{\mybld\rrbracket}       %
+\newunicodechar{⦇}{\mybld\llparenthesis}
+\newunicodechar{⦈}{\mybld\rrparenthesis}
+\newunicodechar{⟼}{\mybld\mapsto}          %
+\newunicodechar{⤳}{\mybld\leadsto}         %
+\newunicodechar{⨁}{\bigoplus}              % 2A01
+\newunicodechar{⨂}{\bigotimes}             % 2A02
+\newunicodechar{⨅}{\bigsqcap}              %
+\newunicodechar{⨆}{\bigsqcup}              %
+
+\newunicodechar{⧖}{% Fake hourglass
+  % Mixing answers from https://tex.stackexchange.com/questions/398410/a-symbol-like-a-hourglass
+  \mybldbin{\vcenter{\hbox{\rotatebox[origin=c]{90}{\mybld\bowtie}}}}%
+}%
+
+\if@stix
+\newunicodechar{≋}{\mybld\approxident}
+\newunicodechar{⬿}{\mybld\leftcurvedarrow}
+\else
+% https://tex.stackexchange.com/questions/238480/approximately-equivalent-symbol
+\def\apeqA{\SavedStyle\mybld\sim}
+\newunicodechar{≋}{%
+  \setstackgap{L}{\dimexpr.5pt+1.5\LMpt}%
+  \ensurestackMath{\ThisStyle{\mathrel{\Centerstack{{\apeqA} {\apeqA} {\apeqA}}}}}%
+}%
+\newunicodechar{⬿}{\text{\reflectbox{⤳}}}
+\fi
+
+\if@MnSymbols
+% https://tex.stackexchange.com/questions/79657/how-to-get-double-angle-bracket-without-using-mnsymbol-package
+\DeclareFontFamily{OMX}{MnSymbolE}{}
+\DeclareSymbolFont{MnLargeSymbols}{OMX}{MnSymbolE}{m}{n}
+\SetSymbolFont{MnLargeSymbols}{bold}{OMX}{MnSymbolE}{b}{n}
+\DeclareFontShape{OMX}{MnSymbolE}{m}{n}{
+    <-6>  MnSymbolE5
+   <6-7>  MnSymbolE6
+   <7-8>  MnSymbolE7
+   <8-9>  MnSymbolE8
+   <9-10> MnSymbolE9
+  <10-12> MnSymbolE10
+  <12->   MnSymbolE12
+}{}
+\DeclareFontShape{OMX}{MnSymbolE}{b}{n}{
+    <-6>  MnSymbolE-Bold5
+   <6-7>  MnSymbolE-Bold6
+   <7-8>  MnSymbolE-Bold7
+   <8-9>  MnSymbolE-Bold8
+   <9-10> MnSymbolE-Bold9
+  <10-12> MnSymbolE-Bold10
+  <12->   MnSymbolE-Bold12
+}{}
+\let\llangle\@undefined
+\DeclareMathDelimiter{\llangle}{\mathopen}%
+                     {MnLargeSymbols}{'164}{MnLargeSymbols}{'164}
+\let\rrangle\@undefined
+\DeclareMathDelimiter{\rrangle}{\mathclose}%
+                     {MnLargeSymbols}{'171}{MnLargeSymbols}{'171}
+\let\langlebar\@undefined
+\DeclareMathDelimiter{\langlebar}{\mathopen}%
+                     {MnLargeSymbols}{'152}{MnLargeSymbols}{'152}
+\let\ranglebar\@undefined
+\DeclareMathDelimiter{\ranglebar}{\mathclose}%
+                     {MnLargeSymbols}{'157}{MnLargeSymbols}{'157}
+\fi
+\newunicodechar{⟪}{\mybld\llangle}
+\newunicodechar{⟫}{\mybld\rrangle}
+
+\if@boldsymbols
+\newunicodechar{♯}{\ensuremath{\text{\bfseries\(\boldsymbol\sharp\)}}}
+\newunicodechar{≜}{\ensuremath{\stackrel{\text{\tiny\bf Δ}}{\boldsymbol{=}}}}
+\newunicodechar{≝}{\ensuremath{\stackrel{\text{\tiny\bf\upshape def}}{\boldsymbol{=}}}}
+\else
+\newunicodechar{♯}{\ensuremath{\sharp}}                         % 266F
+\newunicodechar{≜}{\ensuremath{\stackrel{\text{\tiny Δ}}{=}}}   % 225C
+\newunicodechar{≝}{\ensuremath{\stackrel{\text{\tiny\upshape def}}{=}}} % 225D
+\fi
+
+\newunicodechar{（}{\ensuremath{\left(}}       % FF08
+  \newunicodechar{）}{\ensuremath{\right)}}      % FF09
+\newunicodechar{［}{\ensuremath{\left[}}       % FF3B
+  \newunicodechar{］}{\ensuremath{\right]}}      % FF3D
+\newunicodechar{｛}{\ensuremath{\left\{}}      % FF5B
+  \newunicodechar{｜}{\ensuremath{\,\middle|\,}} % FF5C
+  \newunicodechar{｝}{\ensuremath{\right\}}}     % FF5D
+
+% ---
+% Define some symbols automatically becoming bold.
+
+\if@rawdef
+\if@boldsymbols
+\def\actively#1#2{\begingroup\uccode`\~=`#2\relax\uppercase{\endgroup#1~}}%
+\def\my@active#1#2{\actively\def#1{#2}\mathcode`#1\string"8000}%
+\def\my@active@bold#1#2{%
+  \actively\def#1{\ensuremath{\mybld{\mathchar"#2}}}\mathcode`#1\string"8000%
+}
+%
+% Hummm… does not work in math mode actually.
+\my@active@bold{+}{202B}%
+% \my@active@bold{-}{2200}%
+% \my@active@bold{=}{303D}%
+\my@active@bold{*}{102A}%
+\my@active@bold{,}{602C}%
+\my@active@bold{/}{102F}%
+\my@active@bold{<}{313C}%
+\my@active@bold{>}{313E}%
+%
+\fi
+%
+% Special handling of ` ', `¬' and `×' in math mode
+%
+% NB: I don't know why they sometimes don't show up in math; to
+% investigate: acmart does not need this special care, IEEEtran does…
+\begingroup
+% \catcode160=\active \gdef {?}
+\catcode172=\active \gdef¬{\mybld\neg}
+\catcode215=\active \gdef×{\mybldbin\times}
+\endgroup
+% Make them active in mathmode:
+% \mathcode160=\string"8000
+\mathcode172=\string"8000
+\mathcode215=\string"8000
+\fi
+
+% To be entered manually: `-', `=', `''.
+
+%% See `https://tex.stackexchange.com/questions/64423/exchange-meaning-of-and-colon'
+% \usepackage{mathtools}
+\AtBeginDocument{\DeclareMathSymbol{:}{\mathpunct}{operators}{"3A}}
+\def\colon{\mathrel{:}}
+% \def\textcoloneq{≔}%
+% \def\textdoublecoloneq{⩴}%
+% \newunicodechar{⩴}{\ifmmode \mathrel{{\vcentcolon}{=}} \else \textdoublecoloneq \fi}
+% \def\texteqcolon{≕}%
+% \newunicodechar{≕}{\ifmmode \mathrel{{=}{\vcentcolon}} \else \texteqcolon \fi}
+
+% -------------------------------------------------------------------------------
+\endinput

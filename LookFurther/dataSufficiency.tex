@@ -1,0 +1,25 @@
+\section{Sufficiency of Training Data}\label{sec:trainingsufficiency}
+
+Given a target machine learning algorithm and a set of training data, it is imperative to understand if the training dataset is sufficient for the training of a good machine learning model. While there are some rules of thumb that may be applicable, for example, the training data needs to be 10 times over the number of trainable parameters, it is believed that more principled methods are needed. We remark that, when the training data is insufficient for a given machine learning algorithm, it is easy to make the resulting trained model overfitted, although there are some recent discussions on the observation that over-parameterised neural network does not overfit \cite{NEURIPS2019_62dad6e2}. 
+
+\subsection*{VC-dimension}
+
+First of all, theoretical results such as Vapnik–Chervonenkis dimension (or VC-dimension) are available to roughly estimate the required number of training data. Specifically, VC-dimension measures the capacity (or expressive power) of a machine learning model. It is defined as the cardinality of the largest set of data points that the machine learning algorithm can shatter. Formally, a machine learning model $f$ parameterised with $\theta$ is said to shatter a set of data instances if for all assignments of the labels to the data instances, there exists a valuation of $\theta$ such that $f$ makes no error when classifying the set of data instances. The readers are referred to Section~\ref{sec:perceptronexpressivity} for an intuitive explanation on the expressivity of a perceptron. For a perceptron of $k$ variables (for example, $k=2$ as in Table~\ref{tab:truthtableand}), the VC-dimension is $k+1$.  
+
+Once we compute the VC dimension $d_{VC}$ for a model $f$, we have the following VC-bound \cite{Vapnik2015}: 
+
+\begin{equation}\label{equ:VCdimension}
+    \displaystyle Pr\left( Err(f,\mathcal{D}) \leq Err(f,D_{train}) + \sqrt{\frac{1}{N}[ d_{VC}(\log(\frac{2N}{d_{VC}})+1)-\log(\frac{\epsilon}{4})}]\right ) = 1 - \epsilon 
+\end{equation}
+where $1-\epsilon$ is an arbitrary probability expressing the confidence, and $N$ is the number of data instances. Then, according to Equation (\ref{equ:VCdimension}), given the required error $Err(f,\mathcal{D})$ and confidence $1-\epsilon$ from the problem, we are able to estimate the number $N$ of training data instances. 
+
+We remark that, in addition to VC-dimensions, there are other machine learning theoretical methods, such as Rademacher complexity and PAC Bayes theory, that can be utilised for this purpose. 
+
+\subsection*{Learning Curve}
+
+In addition to the estimation through VC-dimension, there are empirical ways to determine the size of training dataset. For example, learning curves (as we explained in Figure~\ref{fig:learning_curve} as an example) presents the model performance as the function of the training dataset size. By plotting the learning curve, we are able to 
+%determine the size of training dataset by monitoring 
+monitor the convergence of the curve. Once the learning curve is converged (with e.g., an $\epsilon$ termination threshold), the increase of training dataset size will not lead to significantly improved performance, and it is regarded as the sufficiency of the training data. 
+
+
+

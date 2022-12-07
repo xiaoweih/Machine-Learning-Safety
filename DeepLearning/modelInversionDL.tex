@@ -1,0 +1,41 @@
+%\newpage
+\section{Model Inversion}\label{sec:modelInversionDL}
+
+We consider the case of reconstructing an instance $\textbf{x}$ based on the predictive output probability $f(\hat{\textbf{x}})$. There are mainly two classes of attacks: optimisation based attacks and training based attacks, which we will briefly discuss below.
+
+\subsection{Optimisation Based Method}
+
+The basic idea is to apply gradient based search in the input domain $\mathcal{D}$ to find an instance ${\textbf{x}}$ whose predictive output probability is close to a pre-specified probability vector $f(\hat{\textbf{x}})$. Formally, it is to solve the below optimisation problem: 
+\begin{equation}\label{equ:modelinversionDL1}
+    \begin{array}{rl}
+        \arg\min_{\textbf{x}} & \mathcal{L}(f(\textbf{x}),f(\hat{\textbf{x}})) \\
+    \end{array}
+\end{equation}
+
+However,  a naive optimisation process like Equation (\ref{equ:modelinversionDL1}) tends to generate instances (such as images) that do not really resemble natural input. Therefore, for image classification tasks, some image priors have been proposed as regularisers, i.e., we may consider the following optimisation problem: 
+
+\begin{equation}
+    \begin{array}{rl}
+        \arg\min_{\textbf{x}} & \mathcal{L}(f(\textbf{x}),f(\hat{\textbf{x}})) + P(\textbf{x}) \\
+    \end{array}
+\end{equation}
+where $P(\textbf{x})$ can be e.g., the norm distance metric such as $||\textbf{x}||_2^2$ \cite{DBLP:journals/corr/SimonyanVZ13} or $||\textbf{x}||_6^6$ \cite{DBLP:conf/cvpr/MahendranV15}, or total variation \cite{DBLP:conf/cvpr/MahendranV15}
+\begin{equation}
+    \sum_{i,j} ((x_{i+1,j}-x_{i,j})^2+(x_{i,j+1}-x_{i,j})^2)^{\beta/2}, 
+\end{equation}
+or a combination of these priors \cite{DBLP:journals/corr/YosinskiCNFL15}. 
+
+We remark that, the optimisation based approaches require explicit access to the gradient, and therefore are white-box attacks. Moreover, they need to work with individual instances, and for this reason, can be time-consuming when there are many instances to invert. 
+
+\subsection{Training Based Method}
+
+
+Instead of optimisation based approaches, we may consider training based approaches, which aim to train a model $g$ such that 
+\begin{equation}
+    \argmin_{g} \mathbb{E}_{\textbf{x}\in \mathcal{D}} \mathcal{L}(g(f(\textbf{x})),\textbf{x}) 
+\end{equation}
+where $\mathcal{L}$ is a loss function to measure the similarity of two instances, such as the $L_2$ norm distance. Intuitively, $g$ can invert the model $f$ such that the results, expressed with $g(f(\textbf{x}))$, is close to the original input instance $\textbf{x}$. 
+
+
+Recall that $f:\real^{s_1}\rightarrow \real^{s_K}$. Note that, $g:\real^{s_K}\rightarrow \real^{s_1}$ is a function mapping from the output of $f$ to the input domain. Similar to the synthesis of instances as in model stealing (Chapter~\ref{sec:modelstealingDL}), the training dataset for $g$ can be obtained either from public datasets or random sampling of the model $f$. Some additional operation may be applied to the training dataset before it is used for the training of $g$ \cite{10.1145/3319535.3354261}. While the training of $g$ may take up certain resources, it can invert instances efficiently without having prior knowledge about the model $f$. 
+

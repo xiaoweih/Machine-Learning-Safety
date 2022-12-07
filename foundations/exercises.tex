@@ -1,0 +1,147 @@
+\newpage 
+\Extrachap{Exercises}
+%\addcontentsline{toc}{chapter}{\protect\numberline{}Exercises}%
+
+\begin{newquestion}{\textbf{1}~~}
+ Give an example for a supervised learning problem, an unsupervised learning problem, and a semi-supervised learning problem; 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{2}~~}
+Give an example of a supervised learning problem that is a classification task; 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{3}~~}
+Give an example of a supervised learning problem that is a regression task;
+\end{newquestion}
+
+\begin{newquestion}{\textbf{4}~~}
+Give an example of a clustering problem;
+\end{newquestion}
+
+\begin{newquestion}{\textbf{5}~~}
+For all the above problems, figure out the features and labels for them;
+\end{newquestion}
+
+\begin{newquestion}{\textbf{6}~~}
+Write a program to output the following information: 
+    \begin{enumerate}
+        \item How many samples are in the \textbf{iris} dataset;
+        \item How many features are given for each sample in the \textbf{iris} dataset? 
+        \item What is the value range for each feature? 
+    \end{enumerate}
+\end{newquestion}
+
+\begin{newquestion}{\textbf{7}~~}
+According to Table~\ref{fig:probability} about two random variables $Intelligence$ and $Grade$, 
+    please compute the values    
+$
+P(Grade = B ~|~ Intelligence = Low) 
+$
+and 
+$
+MAP(Grade) 
+$.
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+         & Intelligence = Low & Intelligence = High \\
+         \hline
+       Grade = A  & 0.07 & 0.18 \\
+       \hline
+       Grade = B & 0.28 & 0.09 \\
+       \hline
+       Grade = C & 0.3 & 0.08 \\
+    \hline
+    \end{tabular}
+    \caption{Joint probability for student grade and intelligence}
+    \label{fig:probability}
+\end{table}
+\end{newquestion}
+
+
+\begin{newquestion}{\textbf{8}~~}
+Consider a joint distribution table as in Table~\ref{tab:jointdistribution1}, can you compute the following expressions: 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+         & B=1 & B=2 & B=3 & B=4 \\
+         \hline
+       A=1 & 0.12 & 0.18 & 0.24 & 0.06 \\ 
+       A=2 & 0.06 & 0.09 & 0.12 & 0.03 \\
+       A =3 & 0.02 & 0.03 & 0.04 & 0.01 \\
+       \hline
+    \end{tabular}
+    \caption{Joint distribution table}
+    \label{tab:jointdistribution1}
+\end{table}
+\begin{itemize}
+    \item P(A=1)=0.6
+    \item P(A=2)=0.3
+    \item P(B=3)=0.4 
+    \item P(B=4)=0.1
+    \item P(A=1|B=2)=0.6
+    \item P(B=3|A=3)=0.4
+    \item MAP(A|B=2)=1
+    \item MAP(B|A=2)=3
+    \item MAP(A)=1
+    \item MAP(B)=3
+\end{itemize}
+\end{newquestion}
+
+\begin{newquestion}{\textbf{9}~~}
+Consider a joint distribution table as in Table~\ref{tab:jointdistribution2}, can you compute the following expressions: 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+         & B=1 & B=2 & B=3 & B=4 \\
+         \hline
+       A=1 & 0.12 & 0.18 & 0.24 & 0.02 \\ 
+       A=2 & 0.06 & 0.09 & 0.12 & 0.03 \\
+       A =3 & 0.06 & 0.03 & 0.04 & 0.01 \\
+       \hline
+    \end{tabular}
+    \caption{Joint distribution table}
+    \label{tab:jointdistribution2}
+\end{table}
+\begin{itemize}
+    \item P(A=1)=0.56
+    \item P(A=2)=0.3 
+    \item P(B=3)=0.4
+    \item P(B=4)=0.06
+    \item P(A=1|B=2)=0.6 
+    \item P(B=3|A=3)=2/7
+    \item MAP(A|B=2)=1
+    \item MAP(B|A=2)=3
+    \item MAP(A)=1
+    \item MAP(B)=3
+\end{itemize}
+\end{newquestion}
+
+\begin{newquestion}{\textbf{10}~~}
+Write a program to implement 
+    \begin{itemize}
+        \item ROC curve
+        \item PR curve
+    \end{itemize}
+\end{newquestion}
+
+\begin{newquestion}{\textbf{11}~~}
+Compare a few training/test splits (0.9/0.1, 0.8/0.2, 0.7/0.3) and check their differences on training and test accuracy.
+\end{newquestion}
+
+\begin{newquestion}{\textbf{12}~~}
+Compare a few training/test splits (0.9/0.1, 0.8/0.2, 0.7/0.3) and check their differences on confusion matrix. 
+\end{newquestion}
+
+\begin{newquestion}{\textbf{13}~~}
+Find a data poisoning strategy to make the trained model mis-classify on a given training input.
+\end{newquestion}
+
+\begin{newquestion}{\textbf{14}~~}
+Read the literature to understand the state-of-the-art for backdoor attacks. 
+\end{newquestion}
+
+

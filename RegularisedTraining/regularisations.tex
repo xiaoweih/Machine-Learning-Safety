@@ -1,0 +1,60 @@
+%\newpage
+\section{Regularisation Techniques}
+
+This section introduces several regularisation techniques, which aim to introduce inductive bias to the learning process. 
+%Based on them, we will also present some recent progress on adversarial training, aiming to train a deep learning model that is more robust to input perturbations.  
+
+Assume that, we have a model $f_{\textbf{W}}$, being it a model whose parameters are just initialised or a model that appears during the training process. The dataset is $D=\{(\textbf{x}_i,y_i)~|~i\in \{1..n\}\}$ is a labelled dataset. We are considering the classification task. 
+
+As we have seen in the previous chapters that most machine learning algorithms are to optimise the loss between ground truths and predictions. For example, as suggested in Equation (\ref{equ:linearregression2}), the linear regression is to minimise 
+\begin{equation}\label{equ:linearregression20}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m(\textbf{w}^T\textbf{x}^{(i)}-y^{(i)})^2
+\end{equation}
+and, as suggested in Equation (\ref{equ:mappings}), the convolutional neural network is to minimise 
+\begin{equation}\label{equ:linearregression20}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m(f_{\textbf{w}}(\textbf{x}^{(i)})-y^{(i)})^2
+\end{equation}
+when taking the mean square error as the loss function. 
+%
+Based on such optimisation objectives, stochastic gradient descent based methods are applied to search for the optimal solutions. 
+When the problem is relatively simple, e.g., the number of parameters is small, this may lead to optimal solution. However, this might not work well and it is very easy to over-fit the model when the problem is complex.  
+
+For the complex cases, it is needed to reduce the model complexity by applying regularisation techniques. In the following, we introduce a few regularisation techniques that have been widely used.   
+
+
+\subsection{Ridge Regularisation}
+
+For ridge regularisation, the loss function is updated by having a penalty term, i.e.,   \begin{equation}\label{equ:ridgeregularisation}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m(f_{\textbf{w}}(\textbf{x}^{(i)})-y^{(i)})^2 + \lambda \sum_{w\in \textbf{W}} w^2
+\end{equation}
+where the term $\sum_{w\in \textbf{W}} w^2$ is the square of the magnitude of the coefficients, and $\lambda$ is a hyper-parameters balancing between learning loss and the penalty term. According to the definition, the ridge regularisation reduces the model complexity and multicollinearity.  
+
+\subsection{Lasso Regularisation}
+
+For lasso (least absolute shrinkage and selection operator) regularisation, the loss function is updated by having a penalty term, i.e.,   \begin{equation}\label{equ:ridgeregularisation}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m(f_{\textbf{w}}(\textbf{x}^{(i)})-y^{(i)})^2 + \lambda \sum_{w\in \textbf{W}} |w|
+\end{equation}
+that is, instead of taking squared coefficients, we consider the absolute value of the coefficients. According to the definition, the lasso regularisation encourages the selectivity of features, i.e., make the weight matrix sparser. 
+
+
+
+\subsection{Dropout}
+
+Dropout \cite{JMLR:v15:srivastava14a} is a regularisation technique to reduce the complex co-adaptations of training data. Essentially, it randomly ignores, or drops out, a certain percentage of the layer output during the training. 
+
+
+Dropout can be used on most types of layers, such as  fully connected layers, convolutional layers, and the long short-term memory network layers. It may be applied to any or all hidden layers as well as the input layer, but not on the output layer. 
+%that uses a set of models to collectively 
+%
+Dropout is a training technique, and is not used when making a prediction, i.e., after training. 
+
+
+
+\subsection{Early Stopping}
+
+Early stopping is to use a holdout validation dataset to evaluate whether the training procedure should be terminated to prevent the increase of generalisation error. In general, it is applied when the performance of the model on the validation dataset starts to degrade (e.g. loss begins to increase or accuracy begins to decrease).
+
+
+\subsection{Batch-Normalisation}
+
+Batch-Normalisation is a normalisation step that fixes the means and variances of each layer's inputs. It has been shown useful for efficient training of  some large scale networks. 

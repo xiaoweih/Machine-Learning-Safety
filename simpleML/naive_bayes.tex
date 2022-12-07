@@ -1,0 +1,296 @@
+\newpage 
+\chapter{Naive Bayes}
+
+Naive Bayes is a probabilistic algorithm that can be used for classification problems. Albeit simple and intuitive, naive Bayes performs very well in many practical applications such as the spam filter email application. In the following, we will first introduce the learning algorithm, and then discuss how the naive Bayes may be attacked with respect to the safety properties we discussed in Chapter~\ref{sec:defsafetyissues}. 
+
+\section{Learning Algorithm}
+
+Let $Y$ be a random variable representing the label and $X_1,...,X_n$ be random variables representing the $n$ input features, respectively. The classification problem can be expressed as  
+\begin{equation}\label{equ:nb1}
+    \argmax_{y\in V(Y)}P(Y=y|X_1=x_1,...,X_n=x_n)
+\end{equation}
+which is to find the label $y$ with the maximum  probability given the instance $\textbf{x}=(x_1,...,x_n)$. This can be done by first estimating the following conditional probability table from the training dataset $D$
+\begin{equation}
+    P(Y|X_1,...,X_n)
+\end{equation}
+and then apply Equation (\ref{equ:nb1}) on $\textbf{x}$. 
+
+%\begin{example}
+
+%\end{example}
+
+\subsection*{Bayes Theorem}
+
+Bayes theorem suggests that we have 
+\begin{equation}
+    P(Y|X) = \frac{P(X|Y)P(Y)}{P(X)}
+\end{equation}
+where $P(Y)$ is the prior, $P(X)$ is the evidence, $P(X|Y)$ is the likelihood function, and  $P(Y|X)$ is the posterior.  
+%
+By Bayes theorem, we have that 
+\begin{equation}
+    P(Y|X_1,...,X_n) = \frac{P(X_1,...,X_n|Y)P(Y)}{P(X_1,...,X_n)}
+\end{equation}
+That is, the computation of the conditional probability table $P(Y|X_1,...,X_n)$ can be reduced to the computation of three tables $P(X_1,...,X_n|Y)$, $P(X_1,...,X_n)$, and $P(Y)$. Furthermore, noting that $P(X_1,...,X_n)$ -- representing the data distribution -- is fixed for any $y\in V(Y)$,  we have that 
+\begin{equation}\label{equ:nb2}
+\begin{array}{cl}
+   & \argmax_{y\in V(Y)}P(Y=y|X_1=x_1,...,X_n=x_n)\\
+   \propto & \argmax_{y\in V(Y)}P(X_1=x_1,...,X_n=x_n|Y=y)P(Y=y)
+   \end{array}
+\end{equation}
+Therefore, for the classification problem, it is sufficient to compute two probability tables: $P(X_1,...,X_n|Y)$ and $P(Y)$. 
+
+\subsection*{Estimation of $P(Y)$} 
+
+Estimation of $P(Y)$ can be done by letting 
+\begin{equation}\label{equ:nbe1}
+    P(Y=y) = \frac{\text{Number of instances whose label is $y$}}{\text{Number of all instances}}
+\end{equation}
+for all $y\in V(Y)$. Can we use similar expression to estimate $P(X_1,...,X_n|Y)$? Yes, we can, but it is not scalable. 
+
+\subsection*{Difficulty of estimating $P(X_1,...,X_n|Y)$ directly} Without loss of generality, we assume that all random variables are Boolean. Therefore, to estimation $P(Y)$, we need only compute once the Expression (\ref{equ:nbe1}). If we want to estimate  $P(X_1,...,X_n|Y)$ with a similar expression as Expression (\ref{equ:nbe1}), we will need $(2^n-1)\times 2$ computations -- an exponential computation. 
+
+\subsection*{Assumption}
+
+Naive Bayes assumes that the input features $X_1,...,X_n$ are conditionally independent given the label $Y$, i.e., 
+\begin{equation}\label{equ:nbassump}
+    P(X_1,...,X_n|Y) = \prod_{i=1}^n P(X_i|Y)
+\end{equation}
+With this assumption, $P(X_1,...,X_n|Y)$ can be estimated by computing $n$ tables $P(X_i|Y)$, each of which requires 2 computations. That is, instead of conducting $(2^n-1)\times 2$ computations, we now need $2n$ computations -- a linear time computation. 
+
+With Assumption (\ref{equ:nbassump}), we have the Naive Bayes expression: 
+\begin{equation}
+\begin{array}{cl}
+     &  \argmax_{y\in V(Y)}P(Y=y|X_1=x_1,...,X_n=x_n)\\
+     \propto  & \argmax_{y\in V(Y)}P(Y=y)\prod_{i=1}^nP(X_i=x_i|Y=y)
+\end{array}
+\end{equation}
+
+\subsection*{Algorithm}
+
+The Naive Bayes classification algorithm proceeds in the following three steps: 
+
+\begin{enumerate}
+    \item For each value $y_k\in V(Y)$, we estimate 
+    \begin{equation}
+        \pi_k=P(Y=y_k)
+    \end{equation}
+    \item For each value $x_{ij}$ of each feature $X_i$ and each $y_k\in V(Y)$, we estimate \begin{equation}
+        \theta_{ijk}=P(X_i=x_{ij}| Y = y_k)
+    \end{equation} 
+    \item Given a new input  $\textbf{x}_{new}=(x_1^{new},...,x_n^{new})$, we classify it by letting 
+    \begin{equation}\label{equ:nbes}
+        \hat{y_{new}}\leftarrow \argmax_{y_k} P(Y=y_k)\prod_{i}P(X_i=x_i^{new}| Y=y_k)
+    \end{equation}
+\end{enumerate}
+
+\subsection*{For Continuous Features} The above works with categorical features. For continuous features, we can discretise the values of the feature into a set of categorical values, so that the above method works. We may also consider making assumptions about the distribution of the continuous features. 
+
+For example, let $P(X_i|Y)$ be a Gaussian probability density function, i.e., 
+\begin{equation}\label{equ:nbga}
+    P(X_i|Y) = \frac{1}{\sigma\sqrt{2\pi}} \exp(\frac{-(X_i-\mu)^2}{2\sigma^2})
+\end{equation}
+such that the Gaussian distribution has the expected value $\mu$ and variance $\sigma^2$. We can estimate $\mu$ with 
+\begin{equation}
+    \mu = \frac{\sum_{(\textbf{x},y)\in D} X_i(\textbf{x})}{|D|}
+\end{equation}
+where $X_i(\textbf{x})$ returns the value of feature $X_i$ in instance $\textbf{x}$, and $\sigma^2$
+\begin{equation}
+    \sigma^2 = \frac{1}{|D|-1}\sum_{(\textbf{x},y)\in D} (X_i(\textbf{x})-\mu)^2
+\end{equation}
+Then we can have compute $P(X_i=x_i^{new}| Y=y_k)$ by applying Equation (\ref{equ:nbga}). Afterwards, we can get the classification by Equation (\ref{equ:nbes}). 
+
+\section{Robustness and Adversarial Attack}
+
+The following is a heuristic algorithm.
+based on the definition of probability as in Equation (\ref{equ:nbes}). 
+Assume that we have a data instance with label $(\textbf{x},y)$ and want to find another one $(\textbf{x}',y')$ that is close to $\textbf{x}$. The general idea is to move the instance $\textbf{x}$ gradually along the direction where the probability of being classified as $y$, i.e., $\prod_{i}P(X_i=x_i^{new}| Y=y_k)$,  decreases the most, until the class change. 
+
+First of all, we define 
+\begin{equation}
+    \textbf{x}_i^s = 
+    \begin{cases}
+    \textbf{x} + \epsilon_i & \text{if }$s=+$ \\
+    \textbf{x} - \epsilon_i & \text{if }$s=-$
+    \end{cases}
+\end{equation}
+where $\epsilon_i$ is a 0-vector except for the entry for feature $X_i$, which has value $\epsilon>0$. 
+Then, 
+the gradient along the direction defined by $X_i$ and $s\in \{+,-\}$ is as follows:   
+\begin{equation}
+    \nabla_{i}^sf(\textbf{x}) = \frac{f(\textbf{x}_i^s)-f(\textbf{x})}{||\textbf{x}-\textbf{x}_i^s||}
+\end{equation}
+Then, for the next step, we move $\textbf{x}$ along the following direction to $\textbf{x}'$:  
+\begin{equation}
+    \argmin_{i,s}\nabla_{i}^sf(\textbf{x}) 
+\end{equation}
+and check if there is a misclassification on $\textbf{x}'$. We repeat the above move until there is a misclassification. 
+
+We remark that, the above method is model agnostic, i.e., it can work with any machine learning model as long as the attacker is able to query the model to obtain the predictive probability for an input. 
+
+\subsection*{Is $\textbf{x}'$ an adversarial example?} Yes, because the final $\textbf{x}'$ is obtained by following a sequence of changes until witnessing a misclassification.
+
+
+\subsection*{Is this approach complete?} 
+
+Unfortunately, the above algorithm is incomplete.
+
+\subsection*{Sub-optimality} The resulting $\textbf{x}'$ does not necessarily be the optimal solution.
+
+
+\section{Poisoning Attack}
+
+
+As observed from Equation (\ref{equ:nbes}), whether an input $\textbf{x}_{new}$  is classified as a label $\hat{y}_{new}$ is dependent on the appearance probability of the features $x_i^{new}$ when the class is $\hat{y}_{new}$. Therefore, when intending to force the labelling of $\textbf{x}_{adv}$ as ${y_{new}}$, a simple data poisoning attack is
+%, as described in
+%\cite{10.5555/1387709.1387716}, 
+to add into the training dataset many poisoned samples $(\textbf{x},y)$ such that features of $\textbf{x}_{adv}$ are likely to appear in the training dataset and $y_{adv}$ is the target label. By doing so, when we train a Naive Bayes classifier with this poisoned dataset, the features in the poisoned samples have a higher probability when the class is $y$, which will lead to a higher probability of classifying future inputs with these features as $y$. 
+
+We can also use both the heuristic approaches and the alternating optimisation approach we will  introduce in Section~\ref{sec:poisoningattackdeeplearning} for the poisoning attack. Heuristic approaches require the feature extraction function $g$, which is not available for Naive Bayes classifier. However, it can be replaced with the original sample, i.e., let $g(\textbf{x})=\textbf{x}$.
+
+\section{Model Stealing} 
+
+Naive Beyes algorithm does not have model or trainable parameters. We can use the black-box algorithm that will be introduced in Section~\ref{sec:modelstealingDL} to construct a functionally equivalent model. 
+
+
+\section{Membership Inference}
+
+A few examples of membership inference attacks can be referred to Section~\ref{sec:membershipInferenceDL}. Some of them are model agnostic and therefore can be applied to any machine learning model.  
+
+
+\section{Model Inversion}
+
+We follow the discussion in Section~\ref{sec:modelinversiondecisiontree} to use the formalisation of the problem in Equation (\ref{equ:modelinversionformalisation}). For Naive Bayes, it can be transformed as follows. 
+\begin{equation}\label{equ:modelinversionformalisation2}
+\begin{array}{rl}
+     & \displaystyle\argmax_{v\in V(X_1)}P(X_1=v~|~X_{-1}=\textbf{x}_{-1},y) \\
+  =   &  \displaystyle\argmax_{v\in V(X_1)}\frac{P(y)P(v,\textbf{x}_{-1}|y)}{P(y)P(\textbf{x}_{-1}|y)}\\
+  =   &  \displaystyle\argmax_{v\in V(X_1)}\frac{P(v|y)P(\textbf{x}_{-1}|y)}{P(\textbf{x}_{-1}|y)} = \displaystyle\argmax_{v\in V(X_1)} P(v|y)\\
+\end{array}
+\end{equation}
+Then, this can be estimated with a set of randomly sampled data instances. 
+
+\newpage
+\section{Practice}
+
+
+We can use Gaussian naive Bayes to \textbf{simpleML.py} as follows: 
+
+\begin{lstlisting}[language=Python]
+from sklearn import datasets
+iris = datasets.load_iris()
+X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.20)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+gnb.fit(X_train, y_train)
+print("Training accuracy is %s"% gnb.score(X_train,y_train))
+print("Test accuracy is %s"% gnb.score(X_test,y_test))
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+print("Labels of all instances:\n%s"%y_test)
+y_pred = gnb.predict(X_test)
+print("Predictive outputs of all instances:\n%s"%y_pred)
+
+from sklearn.metrics import classification_report, confusion_matrix
+print("Confusion Matrix:\n%s"%confusion_matrix(y_test, y_pred))
+print("Classification Report:\n%s"%classification_report(y_test, y_pred))
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from collections import Counter
+
+class GaussianNB_:
+    def __init__(self):
+        self.prior = None
+        self.avgs = None
+        self.vars = None
+        self.n_class = None
+        
+    def _get_prior(self, y):
+        cnt = Counter(y)
+        prior = np.array([cnt[i] / len(y) for i in range(len(cnt))])
+        return prior
+    
+    def _get_avgs(self, X, y):
+        return np.array([X[y == i].mean(axis=0) for i in range(self.n_class)])
+    
+    def _get_vars(self, X, y):
+        return np.array([X[y == i].var(axis=0) for i in range(self.n_class)])
+    
+    def _get_likelihood(self, row):
+        return (1 / np.sqrt(2 * np.pi * self.vars) * np.exp(-(row - self.avgs)**2 / (2 * self.vars))).prod(axis=1)
+    
+    def fit(self, X, y):
+        self.prior = self._get_prior(y)
+        self.n_class = len(self.prior)
+        self.avgs = self._get_avgs(X, y)
+        self.vars = self._get_vars(X, y)
+        
+    def predict_prob(self, X):
+        likelihood = np.apply_along_axis(self._get_likelihood, axis=1, arr=X)
+        probs = self.prior * likelihood
+        probs_sum = probs.sum(axis=1)
+        return probs / probs_sum[:, None]
+    
+    def predict(self, X):
+        return self.predict_prob(X).argmax(axis=1)
+
+def get_acc(y, y_hat):
+    a = 0
+    for i in range(len(y)):
+        if y[i]==y_hat[i]:
+            a += 1
+    return a/len(y)
+
+clf = GaussianNB_()
+clf.fit(X_train, y_train)
+
+y_hat = clf.predict(X_train)
+acc = get_acc(y_train, y_hat)
+print("Train accuracy is %s"% acc)
+
+y_hat = clf.predict(X_test)
+acc = get_acc(y_test, y_hat)
+print("Test accuracy is %s"% acc)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+import itertools
+
+# Attack on GaussianNB
+def GaussianNB_attack(clf, X_predict, y_predict): 
+    m = np.diag([0.5,0.5,0.5,0.5])*4
+    flag = True
+    for i in range(1,5):
+        for ii in list(itertools.combinations([0,1,2,3],i)):
+            delta = np.zeros(4)
+            for jj in ii:
+                delta += m[jj]
+            
+            y_pre = clf.predict(copy.deepcopy(X_predict)+delta)      
+            if y_predict != y_pre:
+                X_predict += delta
+                flag = False
+                break
+                
+            y_pre = clf.predict(copy.deepcopy(X_predict)-delta)      
+            if y_predict != y_pre:
+                X_predict -= delta
+                flag = False
+                break
+        if not flag:
+            break
+    
+    print('attack data: ', X_predict)
+    print('predict label: ', clf.predict(copy.deepcopy(X_predict)))
+
+X_test_ = X_test[0:1]
+y_test_ = y_test[0]
+print('original data: ', X_test_)
+print('original label: ', y_test_)
+GaussianNB_attack(clf, X_test_, y_test_)
+\end{lstlisting}

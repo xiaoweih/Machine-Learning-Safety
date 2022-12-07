@@ -1,0 +1,91 @@
+% -*- coding: utf-8; mode: latex -*-
+\tcbuselibrary{listings}
+\tcbuselibrary{skins}
+
+\colorlet{shframe}{black!33!white}
+\colorlet{shback}{black!6!white}
+
+\newcommand\lstshellstyle{% \fontfamily{lmtt}\selectfont%
+  % \fontfamily{cmtt}\selectfont%
+  \ttfamily
+  \upshape%
+  \footnotesize% \ttfamily
+}
+
+\lstset{%
+  basicstyle=\lstshellstyle,
+}
+
+\usepackage{accsupp}
+\newcommand\NotCopyable[1]{\BeginAccSupp{method=escape,ActualText={}}#1\EndAccSupp{}}
+
+\newtcblisting{cmds}{%
+  textmarker,
+  colframe = shframe,
+  colback = shback,
+  breakable = false,            %<- for copy-paste
+  listing only,%
+  listing options={%
+    style=tcblatex,
+    language=sh,
+    prebreak=\lstshellstyle\textbackslash,
+    basicstyle=\lstshellstyle,
+  },
+  every listing line={%
+    \NotCopyable{\textcolor{red}{\lstshellstyle\$ }}%
+  },
+  after={\par\noindent},
+}
+
+\newcommand*{\shparambox}[1]{%
+  % \tcbox[on line, boxsep=0pt, left=1pt, right=1pt, top=1pt, bottom=1pt]{%
+  \tcbox[on line, boxsep=0pt, left=1pt, right=1pt,
+         top=0pt, bottom=0pt, toprule=0pt, bottomrule=0pt,
+         arc=0pt, outer arc=0pt, colback=shback, colframe=shframe]{%
+    \lstshellstyle\strut #1%
+  }
+}%
+
+\makeatletter
+\@ifclassloaded{beamer}{%
+  \setenumerate[1]{
+    label=\protect\usebeamerfont{enumerate item}%
+          \protect\usebeamercolor[fg]{enumerate item}%
+          \insertenumlabel.%
+  }
+  \setitemize{
+    label=\protect\usebeamerfont*{itemize item}%
+          \protect\usebeamercolor[fg]{itemize item}%
+          \protect\usebeamertemplate{itemize item}%
+  }
+}{                              % not beamer:
+  \newlist{shparamdescr}{description}{4}
+  \setlist[shparamdescr]{
+    format=\mdseries\shparambox,
+    nosep,
+    left=0pt,
+    labelindent=0pt,
+    labelwidth=*,
+  }
+}
+\makeatother
+
+% NB: this MUST NOT be followed by any `\makeatletter … \makeatother'
+\lstMakeShortInline[%
+  language=sh,
+  breaklines,                   %allow breaks in inline code.
+]@%
+\newcommand\inlinesh[1]{\lstinline[language=sh,breaklines]!#1!}%
+
+% For verbatim outputs (potentially with utf-8 chars):
+\newminted{text}{%
+  tabsize=2,
+  breaklines,
+  fontsize=\footnotesize\smaller,
+}
+\BeforeBeginEnvironment{textcode}{\begin{logbox}}%
+\AfterEndEnvironment{textcode}{\end{logbox}\noindent}%
+
+% Local variables:
+% TeX-master: "main"
+% End:

@@ -1,0 +1,49 @@
+\section{Loss Functions}
+
+This section introduces variants of loss functions, which are learning objectives. %
+Assume that, we have a model $f_{\textbf{W}}$, being it a model whose parameters are just initialised or a model who appears during the training process. The dataset is $D=\{(\textbf{x}_i,y_i)~|~i\in \{1..n\}\}$ is a labelled dataset. We are considering the classification task. 
+
+In previous sections, we have introduced mean squared error (MSE), repeated as below, for linear regression. MSE is one of the most widely used loss functions. 
+
+%\subsection*{Mean Squared Error (MSE)}
+
+\begin{equation}\label{equ:mseloss}
+    \hat{L}(f_\textbf{W}) = \frac{1}{m}\sum_{i=1}^m(f_{\textbf{W}   }(\textbf{x}^{(i)})-y^{(i)})^2
+\end{equation}
+Intuitively, MSE measures the average areas of the square created by the predicted and ground-truth points. 
+
+\subsection*{Mean Absolute Error}
+
+\begin{equation}\label{equ:maeloss}
+    \hat{L}(f_\textbf{w}) = \frac{1}{m}\sum_{i=1}^m|f_{\textbf{W}}(\textbf{x}^{(i)})-y^{(i)}|
+\end{equation}
+Unlike MSE which concerns the areas of square, MAE concerns the geometrical distance between 
+the predicted and ground-truth points. Comparing to MSE whose derivative can be easily computed, it is harder to compute derivative for MAE. 
+
+\subsection*{Root Mean Squared Error (RMSE)}
+
+RMSE is very similar to MSE, except for the square root operation. 
+
+\begin{equation}\label{equ:rmseloss}
+    \hat{L}(f_\textbf{w}) = \sqrt{\frac{1}{m}\sum_{i=1}^m(f_{\textbf{W}}(\textbf{x}^{(i)})-y^{(i)})^2}
+\end{equation}
+
+\subsection*{Binary Cross Entropy Cost Function}
+
+When considering binary classification, i.e., $C=\{0,1\}$, we may utilise information theoretical concepts, cross entropy, which measures the difference between two distributions for the predictions and the ground truths.  
+%
+\begin{equation}\label{equ:binarycrossentropyloss}
+    \hat{L}(f_\textbf{w}) = \sum_{i=1}^m - y^{(i)}\log  f_{\textbf{W}}(\textbf{x}^{(i)})-  (1-y^{(i)})\log  (1-f_{\textbf{W}}(\textbf{x}^{(i)}))
+\end{equation}
+%
+where 
+Cross entropy loss works better after the softmax layer, because the output of the softmax layer represents a distribution. 
+
+
+\subsection*{Categorical Cross Entropy Cost Function}
+
+Extending the above to multiple classes, we may have 
+\begin{equation}\label{equ:crossentropyloss}
+    \hat{L}(f_\textbf{w}) = - \sum_{i=1}^m \sum_{c\in C} \textbf{y}^{(i)}_c\log  [f_{\textbf{W}}(\textbf{x}^{(i)})]_c
+\end{equation}
+where $\textbf{y}^{(i)}$ is the one-hot representation of the ground truth $y^{(i)}$ and $\textbf{y}^{(i)}_c$ denotes the component of $\textbf{y}^{(i)}$ that is for the class $c$. Also, unlike the previous notations, $f_{\textbf{W}}(\textbf{x}^{(i)})$ is a probability distribution   of the prediction over $\textbf{x}^{(i)}$, and $[f_{\textbf{W}}(\textbf{x}^{(i)})]_c$ denotes the component of $f_{\textbf{W}}(\textbf{x}^{(i)})$ that is for the class $c$. 

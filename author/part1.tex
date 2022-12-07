@@ -1,0 +1,36 @@
+%%%%%%%%%%%%%%%%%%%%%part.tex%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% sample part title
+%
+% Use this file as a template for your own input.
+%
+%%%%%%%%%%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{partbacktext}
+\part{Safety Properties}\label{chap:intro}
+%\noindent Use the template \emph{part.tex} together with the document class SVMono (monograph-type books) or SVMult (edited books) to style your part title page and, if desired, a short introductory text (maximum one page) on its verso page.
+
+The first part of this book will introduce fundamental knowledge about machine learning (Chapter~\ref{chap:basics}) and discuss how the machine learning models are evaluated, including both traditional model evaluation methods (Chapter~\ref{sec:usualevaluation}) and the focus on this book -- safety properties (Chapter~\ref{sec:defsafetyissues}). For safety properties, we only present their definitions, with the methods on how to deal with them covered throughout the book. 
+The readers are referred to Part~\ref{part:math} (Appendix) for mathematical foundations.
+%that are needed for the technical contents. 
+
+
+While this book includes content on the design and training of machine learning models, its key focus is on whether a trained machine learning model will perform safely 
+%and securely 
+when deployed in a real-world application. For example, it is interesting to know if a perception system, implemented with convolutional neural networks, can work well in a self-driving car system without compromising its safety through e.g., misclassifying the pedestrians or a lorry.
+Model evaluation (Chapter~\ref{sec:usualevaluation}) is traditionally an integral part of the machine learning model development process. It uses statistical methods to help determine the best machine learning model for a given dataset, and help understand how well the machine learning model will perform in the future. All the evaluations are dependent on the dataset that is collected prior to the model development process. While  model evaluation methods give some indications on the quality of a machine learning model, they are not testing whether or not the model is ``correct''. Rather, it considers whether the model ``fits'' well for the training data, or whether the model is ``useful'' for the problem. 
+
+%do not consider the environment in which a machine learning model may work, and therefore do not give sufficient consideration to the safety property of the machine learning model.   
+
+
+Safety properties (Chapter~\ref{sec:defsafetyissues}) describe the safety and security errors when deploying a machine learning model in an application, in particular when the application may present some risks that are not present in (or cannot be easily detected from) the training dataset. 
+In this book, we consider safety and security as interchangeable concepts, both of which suggest the system is free of risks, with security focusing on deliberate attacks from an attacker.
+The properties to be discussed will include the consideration that the training dataset is not representative enough for the actual working environment (e.g., generalisation error), the consideration that the working  environment may include noises (e.g., robustness error), and the consideration that the working environment may have adversarial agents that intend to compromise the machine learning model for their benefits (e.g., adversarial examples, poisoning attacks, backdoor attacks, model stealing, membership inference, and model inversion).
+
+After the definition of safety and security properties in this part, we will discuss the safety threads, i.e., the identification of safety and security errors, in  Part~\ref{chap:simple}. We will then discuss
+two core safety solutions, i.e., verification and enhancement, in Part~\ref{chap:verification}, and several extended safety solutions in Part~\ref{chap:lookfurther}.
+%the enhancement of the machine learning models to reduce the safety and security errors, in Part~\ref{chap:advtraining}. 
+
+%that will be useful for the later technical contents. After explaining basic concepts in machine learning, we will introduce probability theory and linear algebra, two mathematical foundations among many others for machine learning. 
+
+\end{partbacktext}

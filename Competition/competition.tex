@@ -1,0 +1,510 @@
+\chapter{Competition: Resilience to Adversarial Attack}\label{sec:competitionresilience}
+
+This is a student competition to address two key issues in modern deep learning, i.e., 
+\begin{itemize}
+    \item[O1] how to find better adversarial attacks, and
+    \item[O2] how to train a deep learning model with better robustness to the adversarial attacks.
+\end{itemize}
+We provide a template code (\textbf{Competition/Competition.py}), where there are two code blocks corresponding to the training and the attack, respectively. The two code blocks are filled with the simplest implementations representing the baseline methods, and the participators are expected to replace the baseline methods with their own implementations, in order to achieve better performance regarding the above O1 and O2. 
+
+\section{Submissions}
+
+In the end, we will collect submissions from the students and rank them according to a pre-specified metric taking into consideration both O1 and O2. 
+%
+Assume that we have $n$ students participating in this competition, and we have a set $S$ of submissions.
+
+\vspace{1em}
+\begin{tcolorbox}
+Every student with student number $i$ will submit a  package \textbf{$i$.zip},  which includes two files:
+\begin{enumerate}
+    \item $i$\textbf{.pt}, which is the file to save the trained model, and
+    \item competition\_$i$\textbf{.py}, which is your  script after updating the two code blocks in \textbf{Competition.py} with your implementations.  
+\end{enumerate}  \\NB: Please carefully follow the naming convention as indicated above, and we will not accept submissions which do not follow the naming convention. 
+\end{tcolorbox}
+
+
+\section{Source Code}
+
+The template source code of the competition is available at 
+\begin{tcolorbox}[center, boxsep=0pt, left=1ex, right=1ex, width = 9cm, before upper=\strut, tcbox width = minimum center, box align=center, halign=center, colback=white, colframe=blue!50!black]
+\url{https://github.com/xiaoweih/AISafetyLectureNotes/tree/main/Competition}
+\end{tcolorbox}
+
+
+\vspace{2em}
+
+In the following, we will explain each part of the code. 
+
+
+
+\subsection*{Load packages}
+
+First of all, the following code piece imports a few packages that are needed. 
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+import torch.optim as optim
+import torchvision
+from torchvision import transforms
+from torch.autograd import Variable
+import argparse
+import time
+import copy
+\end{lstlisting}
+
+Note: You can add necessary packages for your implementation. 
+
+
+
+\subsection*{Define competition ID} The below line of code defines the student number. By replacing it with your own student number, it will automatically output the file $i$\textbf{.pt} once you trained a model. 
+
+%You need to change the below id into your student ID number. This will ensure that the saved model (to be explained later) is named as $i$\textbf{.pt} automatically. 
+
+
+\begin{lstlisting}[language=Python]
+# input id
+id_ = 1000
+\end{lstlisting}
+
+
+\subsection*{Set training parameters}
+
+The following is to set the hyper-parameters for training. It considers e.g., batch size, number of epochs, whether to use CUDA, learning rate, and random seed. You may change them if needed. 
+
+\begin{lstlisting}[language=Python]
+# setup training parameters
+parser = argparse.ArgumentParser(description='PyTorch MNIST Training')
+parser.add_argument('--batch-size', type=int, default=128, metavar='N',
+                    help='input batch size for training (default: 128)')
+parser.add_argument('--test-batch-size', type=int, default=128, metavar='N',
+                    help='input batch size for testing (default: 128)')
+parser.add_argument('--epochs', type=int, default=10, metavar='N',
+                    help='number of epochs to train')
+parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+                    help='learning rate')
+parser.add_argument('--no-cuda', action='store_true', default=False,
+                    help='disables CUDA training')
+parser.add_argument('--seed', type=int, default=1, metavar='S',
+                    help='random seed (default: 1)')
+args = parser.parse_args(args=[]) 
+\end{lstlisting}
+
+\subsection*{Toggle GPU/CPU}
+
+Depending on whether you have GPU in your computer, you may toggle between devices with the below code. Just to remark that, for this competition, the usual CPU is sufficient and a GPU is not needed. 
+
+\begin{lstlisting}[language=Python]
+# judge cuda is available or not
+use_cuda = not args.no_cuda and torch.cuda.is_available()
+#device = torch.device("cuda" if use_cuda else "cpu")
+device = torch.device("cpu")
+
+torch.manual_seed(args.seed)
+kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+\end{lstlisting}
+
+
+\subsection*{Loading dataset and define network structure}
+
+In this competition, we use the same dataset (FashionMNIST) and the same network architecture. The following code specify how to load dataset and how to construct a 3-layer neural network. Please do not change this part of code. 
+
+\begin{lstlisting}[language=Python]
+####################################################don't change the below code    ####################################################
+
+train_set = torchvision.datasets.FashionMNIST(root='data', train=True, download=True, transform=transforms.Compose([transforms.ToTensor()]))
+train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
+
+test_set = torchvision.datasets.FashionMNIST(root='data', train=False, download=True, transform=transforms.Compose([transforms.ToTensor()]))
+test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=True)
+
+# define fully connected network
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.fc1 = nn.Linear(28*28, 128)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, 32)
+        self.fc4 = nn.Linear(32, 10)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
+        x = F.relu(x)
+        x = self.fc3(x)
+        x = F.relu(x)
+        x = self.fc4(x)
+        output = F.log_softmax(x, dim=1)
+        return output
+
+####################################################end of "don't change the below code"   ####################################################
+\end{lstlisting}
+
+
+\subsection*{Adversarial Attack}
+
+The part is the place needing your implementation, for O1. In the template code, it includes a baseline method which uses random sampling to find adversarial attacks. You can only replace the  middle part of the function with your own implementation (as indicated in the code), and are not allowed to change others. 
+
+\begin{lstlisting}[language=Python]
+'generate adversarial data, you can define your adversarial method'
+def adv_attack(model, X, y, device):
+    X_adv = Variable(X.data)
+    
+    ############################################Note: below is the place you need to edit to implement your own attack algorithm
+    ############################################
+    
+    random_noise = torch.FloatTensor(*X_adv.shape).uniform_(-0.1, 0.1).to(device)
+    X_adv = Variable(X_adv.data + random_noise)
+    
+    ############################################ end of attack method
+    ############################################
+    
+    return X_adv
+\end{lstlisting}
+
+
+\subsection*{Evaluation Functions}
+
+Below are two supplementary functions that return loss and accuracy over test dataset and adversarially attacked test dataset, respectively. We note that the function \textbf{adv\_attack} is used in the second function. You are not allowed to change these two functions. 
+
+\begin{lstlisting}[language=Python]
+'predict function'
+def eval_test(model, device, test_loader):
+    model.eval()
+    test_loss = 0
+    correct = 0
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            data = data.view(data.size(0),28*28)
+            output = model(data)
+            test_loss += F.nll_loss(output, target, size_average=False).item()
+            pred = output.max(1, keepdim=True)[1]
+            correct += pred.eq(target.view_as(pred)).sum().item()
+    test_loss /= len(test_loader.dataset)
+    test_accuracy = correct / len(test_loader.dataset)
+    return test_loss, test_accuracy
+
+def eval_adv_test(model, device, test_loader):
+    model.eval()
+    test_loss = 0
+    correct = 0
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            data = data.view(data.size(0),28*28)
+            adv_data = adv_attack(model, data, target, device=device)
+            output = model(adv_data)
+            test_loss += F.nll_loss(output, target, size_average=False).item()
+            pred = output.max(1, keepdim=True)[1]
+            correct += pred.eq(target.view_as(pred)).sum().item()
+    test_loss /= len(test_loader.dataset)
+    test_accuracy = correct / len(test_loader.dataset)
+    return test_loss, test_accuracy
+\end{lstlisting}
+
+
+\subsection*{Adversarial Training}
+
+Below is the second place needing your implementation, for O2. In the template code, there is a baseline method. You can replace relevant part of the code as indicated in the code. 
+
+\begin{lstlisting}[language=Python]
+#train function, you can use adversarial training
+def train(args, model, device, train_loader, optimizer, epoch):
+    model.train()
+    for batch_idx, (data, target) in enumerate(train_loader):
+        data, target = data.to(device), target.to(device)
+        data = data.view(data.size(0),28*28)
+        
+        #use adverserial data to train the defense model
+        #adv_data = adv_attack(model, data, target, device=device)
+        
+        #clear gradients
+        optimizer.zero_grad()
+        
+        #compute loss
+        #loss = F.nll_loss(model(adv_data), target)
+        loss = F.nll_loss(model(data), target)
+        
+        #get gradients and update
+        loss.backward()
+        optimizer.step()
+        
+#main function, train the dataset and print train loss, test loss for each epoch
+def train_model():
+    model = Net().to(device)
+    
+    #####################################################################
+    ## Note: below is the place you need to edit to implement your own training algorithm
+    ##       You can also edit the functions such as train(...). 
+    #####################################################################
+    
+    optimizer = optim.SGD(model.parameters(), lr=args.lr)
+    for epoch in range(1, args.epochs + 1):
+        start_time = time.time()
+        
+        #training
+        train(args, model, device, train_loader, optimizer, epoch)
+        
+        #get trnloss and testloss
+        trnloss, trnacc = eval_test(model, device, train_loader)
+        advloss, advacc = eval_adv_test(model, device, train_loader)
+        
+        #print trnloss and testloss
+        print('Epoch '+str(epoch)+': '+str(int(time.time()-start_time))+'s', end=', ')
+        print('trn_loss: {:.4f}, trn_acc: {:.2f}%'.format(trnloss, 100. * trnacc), end=', ')
+        print('adv_loss: {:.4f}, adv_acc: {:.2f}%'.format(advloss, 100. * advacc))
+        
+    adv_tstloss, adv_tstacc = eval_adv_test(model, device, test_loader)
+    print('Your estimated attack ability, by applying your attack method on your own trained model, is: {:.4f}'.format(1/adv_tstacc))
+    print('Your estimated defence ability, by evaluating your own defence model over your attack, is: {:.4f}'.format(adv_tstacc))
+    ############################################
+    ## end of training method
+    ############################################
+    
+    #save the model
+    torch.save(model.state_dict(), str(id_)+'.pt')
+    return model
+\end{lstlisting}
+
+
+\subsection*{Define Distance Metrics}
+
+In this competition, we take the $L_\infty$ as the distance measure. You are not allowed to change the code. 
+
+\begin{lstlisting}[language=Python]
+#compute perturbation distance
+def p_distance(model, train_loader, device):
+    p = []
+    for batch_idx, (data, target) in enumerate(train_loader):
+        data, target = data.to(device), target.to(device)
+        data = data.view(data.size(0),28*28)
+        data_ = copy.deepcopy(data.data)
+        adv_data = adv_attack(model, data, target, device=device)
+        p.append(torch.norm(data_-adv_data, float('inf')))
+    print('epsilon p: ',max(p))
+\end{lstlisting}
+
+\subsection*{Supplementary Code for Test Purpose}
+
+In addition to the above code, we also provide two lines of code for testing purpose. You must comment them out in your submission. 
+%
+The first line is to call the \textbf{train\_model()} method to train a new model, and the second is to check the quality of attack based on a model. 
+
+\begin{lstlisting}[language=Python]
+#Comment out the following command when you do not want to re-train the model
+#In that case, it will load a pre-trained model you saved in train_model()
+model = train_model()
+
+#Call adv_attack() method on a pre-trained model
+#The robustness of the model is evaluated against the infinite-norm distance measure
+#!!! Important: MAKE SURE the infinite-norm distance (epsilon p) less than 0.11 !!!
+p_distance(model, train_loader, device)
+\end{lstlisting}
+
+\section{Implementation Actions}
+
+Below, we summarise the actions that need to be taken for the completion of a submission: 
+
+\begin{enumerate}
+    \item You must assign the variable \textbf{id\_} with your student ID $i$;
+    \item You need to update the \textbf{adv\_attack} function with your adversarial attack method; 
+    \item You may change the hyper-parameters defined in \textbf{parser} if needed; 
+    \item You must make sure the perturbation distance less than \textbf{0.11}, (which can be computed by \textbf{p\_distance} function); 
+    \item You need to update the \textbf{train\_model} function (and some other functions that it called such as \textbf{train}) with your own training method;
+    \item You need to use the line ``model = train\_model()'' to train a model and check whether there is a file $i$\textbf{.pt}, which stores the weights of your trained model;
+    \item You must submit $i$\textbf{.zip}, which includes two files $i$\textbf{.pt} (saved model) and competition\_$i$\textbf{.py} (your script). 
+\end{enumerate}
+
+%You can use the following script to train the defense model, \textbf{note that}  2. you caan use the model, data, target to define your adversarial method from line 106, don't modify the line 105; 3. you also can modify hyper-parameters, e.g., epochs, learning rate, etc, or use special regularizers; 4. you can save the defense model through the function in line 185; 5. do not modify the net architecture; 6. you can test the script from line 190, and you need to annotate the test code in the submission file; 7. you can use adversarial data to train through line 125; 8. you need to submit $i$\textbf{.zip}, which includes two files $i$\textbf{.pt} (saved model) and competition\_$i$\textbf{.py} (your script).       
+
+
+
+
+\iffalse
+\begin{enumerate}
+\item Train and test the net.
+
+%The following is the way how to call this functionality: 
+%\begin{cmds}
+%python3 i/aisafetysubmission.py --training --dataset 'data' --model '[path-to-saved-model]/i.pt'
+%\end{cmds}
+%Note that, we require the saved model has $i$ as its name. This is to make sure that there won't be any clash between submissions. The expected output should include the following statement: 
+%\begin{cmds}
+%The model is saved as '[path-to-saved-model]/i.pt' for the dataset 'data'
+%\end{cmds}
+    \item Attack function
+    \begin{itemize}
+        \item \textbf{input}: a saved model $M_i$, an index number $k\in \{0..9000\}$, a number $m\in\{100...1000\}$
+        \item \textbf{output}: $m$ adversarial examples as in a set $Adv_i = (\textbf{X}_{adv},\textbf{y}_{adv})$, and their average perturbations $p_i$ over $L_\infty$ norm distance
+        \item \textbf{additional description}: the attacked data instances are indexed from $k$ to $k+m-1$ in the test dataset, such that one adversarial example is generated for every data instance. \xiaowei{We may need to specify the format of the adversarial examples $(\textbf{X}_{adv},\textbf{y}_{adv})$.}
+    \end{itemize}
+The following is the way how to call this functionality: 
+\begin{cmds}
+python3 i/aisafetysubmission.py --attack --dataset 'data' --model '[path-to-saved-model]/i.pt' --startingIndex [index-of-test-dataset] --number [number-of-adversarial-examples] --adversary '[path-to-adversarial-examples]/i/'
+\end{cmds}
+Note that, after [path-to-adversarial-examples] we have a sub-folder $/i/$. This is to make sure that  there won't be any clash between submissions. The expected output should include the following statement: 
+\begin{cmds}
+The adversarial examples are stored in '[path-to-adversarial-examples]/i/' for the dataset 'data'. They are generated by attacking [number-of-adversarial-examples] data instances in the test dataset, starting from index [index-of-test-dataset]. The average L_inf perturbation is [returned_average_perturbation]
+\end{cmds}
+    \item Evaluation function
+    \begin{itemize}
+        \item \textbf{input}: a saved model $M_i$, a set $Adv_j$ of adversarial examples, where $j\in S$
+        \item \textbf{output}: the score $s_{i,j}$, representing the accuracy of $M_i$ over the union of $Adv_j=(\textbf{X}_{adv},\textbf{y}_{adv})$ and test dataset $(\textbf{X}_{test},\textbf{y}_{test})$. 
+    \end{itemize}
+The following is the way how to call this functionality. Note that, while $j$ could be any number in $S$ so that your model can run through other submissions, you can use $j=i$ to test whether your command work or not.  
+\begin{cmds}
+python3 i/aisafetysubmission.py --evaluation --dataset 'data' --model '[path-to-saved-model]/i.pt' --adversary '[path-to-adversarial-examples]/j/'
+\end{cmds}
+\end{enumerate}
+The expected output should include the following statement: 
+\begin{cmds}
+The score of evaluating those adversarial examples in '[path-to-adversarial-examples]/j/' is [returned_accuracy]
+\end{cmds}
+
+\fi
+
+\iffalse
+
+\section{Submission Files} 
+
+You are expected to submit the following two files:  
+\begin{itemize}
+    \item \textbf{$i$.zip} 
+    \item \textbf{$i$.pt}
+\end{itemize}
+Note that, please make sure that \textbf{$i$.pt} is the one generated by the first command.  
+
+\fi
+
+\subsection*{Sanity Check} 
+
+Please make sure that the following constraints are satisfied. Your submission won't be marked if they are not followed. 
+
+\begin{itemize}
+    \item Submission file: please follow the naming convention as suggested above. 
+    \item Make sure your code can run smoothly. 
+    \item Comment out the two lines ``model = train\_model()'' and ``p\_distance(model, train\_loader , device)'', which are for test purpose. 
+    %\item '[path-to-saved-model]/i.h5' and '[path-to-adversarial-examples]/j/': please follow the naming convention as suggested above
+    %\item make sure your output on the screen is the same as we suggested above. 
+    %\item The generation of 100 adversarial examples won't take more than 5 minutes; that is, if we ask for 300 adversarial examples, it won't take more than 15 minutes. 
+\end{itemize}
+
+
+
+\section{Evaluation Criteria}
+
+Assume that, among the submissions $S$, we have $n$ submissions that can run smoothly and correctly. We can get model $M_i$ by reading the file \textbf{$i$.pt}. 
+%In addition, for each 
+
+Then, we collect the following 
+%two statistics: 
+%\begin{equation}
+%    \textbf{P}=(p_1,...,p_n)
+%\end{equation}
+%for the average perturbation and 
+matrix 
+\begin{equation}
+\textbf{Score} = ~~~
+\begin{blockarray}{cccccc}
+\begin{block}{l(ccccc)}
+  \textbf{i=1} & s_{11} & s_{12} &  ... & s_{1(n-1)} & s_{1n}  \\
+  \textbf{i=2} & s_{21} & s_{22} & ... & s_{2(n-1)} & s_{2n}  \\
+  ... \\
+  \textbf{i=n-1} & s_{(n-1)1} & s_{(n-1)2} & ... & s_{(n-1)(n-1)} & s_{(n-1)n}  \\
+  \textbf{i=n} & s_{n1} & s_{n2} & ... & s_{n(n-1)} & s_{nn}  \\
+\end{block}
+& \textbf{j=1} & \textbf{j=2} & ... & \textbf{j=n-1} & \textbf{j=n}  \\
+\end{blockarray}
+\label{equ:evaluationscores}
+\end{equation}
+for the mutual evaluation scores of using $M_i$ to evaluate $Atk_j$ (defined in function \textbf{adv\_attack}). The score $s_{ij}$ is the \textbf{test accuracy} obtained by using \textbf{adv\_attack} function from the file competition~\_$j$\textbf{.py} to attack the model from \textbf{$i$.pt}. From Equation (\ref{equ:evaluationscores}), we get $j$'s attacking ability by letting 
+\begin{equation}
+    AttackAbility_j = \sum_{i=1}^n \textbf{Score}_{i,j}
+\end{equation}
+to be the total of the scores of $j$-th column. Let $\textbf{AttackAbility}$ be the vector of $AttackAbility_j$. Moreover, we get $i$'s defence ability by letting 
+\begin{equation}
+    DefenceAbility_i = \sum_{j=1}^n \textbf{Score}_{i,j},
+\end{equation} 
+Let $\textbf{DefenceAbility}$ be the vector of $DefenceAbility_i$.
+Then, for the vectors %$\textbf{P}$,
+$\textbf{AttackAbility}$ and $\textbf{DefenceAbility}$, we apply Softmax function to normalise to get 
+\begin{equation}
+    %\sigma(\frac{1}{\textbf{P}}),
+    \sigma(\frac{1}{\textbf{AttackAbility}}), \sigma(\textbf{DefenceAbility})
+\end{equation}
+Then, the final score for the submission $i$ is 
+\begin{equation}
+    FinalScore_i = \sigma(
+    %\sigma(\frac{1}{\textbf{P}})+
+    \sigma(\frac{1}{\textbf{AttackAbility}})+\sigma(\textbf{DefenceAbility}))_i
+\end{equation}
+
+Note that, to reduce the impact of randomness,
+%on selecting the $m$ test data instances, 
+we may conduct 3 rounds of the above process to get the average $FinalScore_i$ for every submission. 
+
+
+\section{Q\&A} 
+
+\subsection*{Will the running time, memory, and CPU usage be considered in marking for the training and attack?}
+
+We only evaluate against a trained model, so no consideration will be given on the running time, memory, and CPU usage in training. For the attack, it will run on marker's computer, so we expect it to run in a reasonable time, e.g., within 1 min for a single image. 
+
+\subsection*{Can we use external pip packages for purposes like hyperparameter tuning? }
+
+You can use external libraries as long as they are consistent with the libraries we suggested for this module, and can be installed easily through either pip or annaconda. 
+
+You can also use package for e.g., attack, but you have to make sure that the package will run well in normal circumstance (so that the markers can run the package). 
+
+\subsection*{Would it be OK to search for popular algorithm and then try to fix that to my submission?}
+
+Yes, you can. Actually, you are free to take -- and adapt -- any existing algorithms/implementations – this is also a skill that is nowadays quite useful in ML field. This will probably be the case for most people.
+
+\subsection*{How would you make sure the competition is fair? I am worrying about that some submissions may try to overfit the test dataset.}
+
+The test dataset is not open, so nobody has access to the test dataset before competition. 
+
+
+
+\subsection*{Architectural search was mentioned in today's Q\&A session, but I think it may be unhelpful since our target network architecture is fixed. The only thing I could come up with is to use Dropouts to deactivate some nodes to achieve a pseudo different net structure?}
+
+Architecture search might not be the most suitable technique to consider here – I mentioned it simply because there was a question I was asked. 
+
+\subsection*{Automated hyperparameter tunning was also mentioned in today's Q\&A. Also, you mentioned several sessions ago that we should make sure to use some widely used reliable libraries. Given that I am using ray tune currently, do you have any recommendations on this?}
+
+It might be OK to try, if you want to exercise on hyper-parameter tuning. I do not have personal preference on the libraries, and you can select whichever you feel OK with. Just to remind you: for the submission, we only look at the trained weights, so will not be able to consider how you tune the parameters to get the weights. 
+
+\subsection*{How will the score of attack/defense be measured? Do we use loss or accuracy or loss \& accuracy to evaluate the result?} 
+
+Please refer to the $p\_distance$ function of the template code for a good understanding of this question.
+
+\subsection*{How could you deal with the connection problem when downloading dataset through python IDLE?} 
+
+Please use CMD (windows) or Terminal (mac) to download the dataset.
+
+
+
+\iffalse
+\subsection*{How about I didn't successfully implement all the three functionalities?}
+
+The following are the marks for individual functionalities: 
+\begin{itemize}
+    \item Training: 20 marks 
+    \item Attack: 20 marks
+    \item Evaluation: 10 marks
+\end{itemize}
+
+You will get rewarded on the functionalities you 
+completed. 
+
+\subsection*{How about some of the functionalities are not implemented correctly?}
+
+You will not participate in the competition and will only get the marks on those functionalities that you have correctly implemented. 
+
+\fi

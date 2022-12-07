@@ -1,0 +1,132 @@
+\newpage
+\chapter{Linear algebra}
+
+
+\section{Scalars, Vectors, Matrices, Tensors} 
+
+\subsection*{Scalar} 
+
+A scalar is a single number. It is represented in lower-case italic, such as $x$. 
+
+\begin{example}
+We can use $x\in\real$, a real-valued scalar, to define the slope of the line. Moreover, we can use $x\in \nat$, a natural number scalar, to define  the number of units. 
+
+\end{example}
+
+\subsection*{Vector}  A vector is an array of numbers arranged in order. Each number in a vector is identified with an index. Vectors are represented as lower-case bold, such as $\textbf{x}$. If $x$ is $n$-dimensional and each element of $\textbf{x}$ is a real number, we write $\textbf{x}\in \real^n$. 
+
+Geometrically, we think of vectors as points in space such that each element of a vector gives coordinate along an axis. This is the same as we consider a data instance -- usually represented as a vector -- as a point in high-dimensional space. 
+
+
+\subsection*{Matrix} A matrix is a 2-D array of numbers, such that each element is identified by two indices. Matrices are represented as bold typeface $\textbf{A}$. We usually identify each element of $\textbf{A}$ with the subscripts, i.e., use $\textbf{A}_{i,j}$ to denote the element on the $i$-th row and $j$-th column. We may also write $\textbf{A}[i:]$ for the $i$-th row of $\textbf{A}$ and $\textbf{A}[:j]$ the $j$-th column of $\textbf{A}$. Similar as the vectors, we may write $\textbf{A}\in\real^{m\times n}$ if $\textbf{A}$ has $m$ rows and $n$ columns and each element is a real number. 
+ 
+
+
+
+\subsection*{Tensor} It is very likely in a machine learning context that, we may need an array with more than two axes. We call a multi-dimensional array arranged on a regular grid with variable number of axes as a tensor.  Tensors are also represented as bold typeface $\textbf{A}$, and we may use the subscripts to identify its element, for example  $\textbf{A}_{i,j,k}$ to denote the element in a three-dimensional tensor. We remark that, a tensor may include more involved properties that a multi-dimensional array does not have, but we omit the details for the simplicity of the explanations. 
+
+
+
+\section{Matrix Operations}
+
+We briefly review a few frequently used matrix operations. 
+
+\subsection*{Transpose of a Matrix }
+
+The transpose of a matrix is an operator which flips a matrix over its diagonal. Given a matrix $\textbf{A}$, we define its transpose $\textbf{A}$ as that 
+\begin{equation}
+    \textbf{A}^T_{ij} = \textbf{A}_{ji} \text{ for all } i,j 
+\end{equation}
+
+
+\subsection*{Linear Transformation}
+
+A linear transformation is a function from one vector space to another that respects the underlying (linear) structure of each vector space.  Linear transformations can be represented by matrices. If $T$ is a linear transformation mapping from $\real^n$ to $\real^m$, and $\textbf{x}$ is a column vector with $n$ entries, then 
+\begin{equation}
+    T(\textbf{x}) = \textbf{A}\textbf{x}
+\end{equation}
+for some $m\times n$ matrix $\textbf{A}$. Also, $\textbf{A}$ is called transformation matrix of $T$. 
+
+\subsection*{Identity Matrix}
+
+The identity matrix of size $n$ is the $n \times n$ square matrix with ones on the diagonal and zeros elsewhere. We use $\textbf{I}$ to denote an identity matrix. 
+
+\subsection*{Matrix Inverse }
+
+An $n\times n$ matrix $\textbf{A}$ is invertible if there exists another $n\times n$ matrix $\textbf{A}$ such that 
+\begin{equation}
+    \textbf{A}\textbf{B} = \textbf{B} \textbf{A} = \textbf{I}
+\end{equation}
+We write $\textbf{B}$ as the inverse of $\textbf{A}$, denoted as  $\textbf{A}^{-1}=\textbf{B}$, 
+
+%\subsection*{Solving Simultaneous equations }
+
+\section{Norms}\label{sec:norms}
+
+Usually, a distance function is employed to compare data instances. Ideally, such a distance should reflect perceptual similarity between data instances, comparable to e.g., human perception for image classification networks. A distance metric should satisfy a few axioms which are usually needed for defining a metric space: 
+\begin{itemize}
+\item $||\textbf{x}||\geq 0$ (non-negativity),
+\item $||\textbf{x}-\textbf{y}||=0$ implies that $\textbf{x} = \textbf{y}$ (identity of indiscernibles),
+\item $||\textbf{x}-\textbf{y}|| = ||\textbf{y}-\textbf{x}||$ (symmetry),
+\item $||\textbf{x}-\textbf{y}||+||\textbf{y}-\textbf{z}|| \geq ||\textbf{x}-\textbf{z}||$ (triangle inequality).
+\end{itemize}
+
+In practise, $L_p$-norm distances are used, including
+
+\begin{itemize}
+    \item $L_1$ (Manhattan distance): \begin{equation}
+        ||\textbf{x}||_1 = \sum_{i=1}^{n} |x_i|
+    \end{equation}
+    \item $L_2$ (Euclidean distance):
+    \begin{equation}||\textbf{x}||_2 = \sqrt{\sum_{i=1}^{n} x_i^2}\end{equation}
+    \item $L_\infty$ (Chebyshev distance): \begin{equation}||\textbf{x}||_\infty  = \max_{i} |x_i|\end{equation}
+\end{itemize}
+Moreover, we also consider $L_0$-norm as $||\textbf{x}||_0 = |\{x_i~|~x_i\neq 0, i = 1..n\}|$, i.e., the number of non-zero elements. Note that, $L_0$-norm does not satisfy the triangle inequality. 
+In addition to these, there exist other distance metrics such as Fréchet Inception Distance \cite{10.5555/3295222.3295408}. In addition, Frobenius norm of a matrix is represented by $||\cdot||_{\mathrm{Fr}}$.
+
+Given a data instance $x$ and a distance metric $L_p$, the \emph{neighbourhood} of $\textbf{x}$ is defined as follows.
+\begin{definition}[d-Neighbourhood]\label{def:inputregion}
+Given a data instance $\textbf{x}$, a distance function $L_p$, and a distance $d$, we define 
+the \emph{d-neighbourhood} $\eta(\textbf{x},L_p,d)$ of $\textbf{x}$ w.r.t. $L_p$ as 
+\begin{equation}
+\eta(\textbf{x},L_p,d)=\{\hat{\textbf{x}} ~|~ \distance{\hat{\textbf{x}}-\textbf{x}}{p} \leq d\},
+\end{equation}
+the set of data instances whose distance to $\textbf{x}$ is no greater than $d$ with respect to $L_p$.  
+\end{definition}
+
+
+\section{Variance, Covariance, and Covariance Matrix}\label{sec:variance}
+
+\subsection*{Variance} measures the variation of a single random variable. Formally, 
+\begin{equation}
+    Var(X) = \mathbb{E}[(X-\overline{X})^2]
+\end{equation}
+where $\displaystyle\overline{X}=\mathbb{E}[X]$ is the mean. If we are working with a finite set $D$ of data samples, we have 
+% and 
+\begin{equation}
+  \overline{X}=\frac{1}{|D|}\sum_{\textbf{x}\in D}\textbf{x} \hspace{2cm} Var(X) = \frac{1}{|D|} \sum_{\textbf{x}\in D}(\textbf{x} - \bar{X})^2
+\end{equation}
+where $|D|$ denotes the number of samples in $D$. 
+%
+
+\subsection*{Covariance}, based on variance, measures how much two random variables vary together. Formally, 
+\begin{equation}
+    Cov(X,Y) = \mathbb{E}[(X-\mathbb{E}[X])(Y-\mathbb{E}[Y])]
+\end{equation}
+If working with a dataset $D$ of $(\textbf{x},\textbf{y})$ pairs, it is 
+\begin{equation}
+    Cov(X,Y) = \frac{1}{|D|} \sum_{(\textbf{x},\textbf{y})\in D}(\textbf{x} - \bar{X})(\textbf{y}- \bar{Y})
+\end{equation}
+
+\subsection*{Covariance Matrix} Generalising the above, consider a column vector $\textbf{X} = (X_1,...,X_n)^T$ of random variables, we can have the covariance matrix as follows: 
+\begin{equation}
+    \textbf{K}= \begin{bmatrix}
+     Cov(X_1,X_1)       & Cov(X_1,X_2) & Cov(X_1,X_3) & \dots & Cov(X_1,X_n) \\
+    Cov(X_2,X_1)       & Cov(X_2,X_2) & Cov(X_2,X_3) & \dots & Cov(X_2,X_n) \\
+    \hdotsfor{5} \\
+    Cov(X_n,X_1)       & Cov(X_n,X_2) & Cov(X_n,X_3) & \dots & Cov(X_n,X_n)
+\end{bmatrix}
+\end{equation}
+
+
+

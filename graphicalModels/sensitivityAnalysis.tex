@@ -1,0 +1,25 @@
+\newpage
+\chapter{Sensitivity Analysis}
+
+As suggested earlier, it is possible that some probability tables of a graphical model can be obtained through machine learning. However, considering that a machine learning may be subject to various safety risks, it is useful to study how such safety risks on machine learning learning may affect the inference on the graphical model. In particular, we consider the following problem: 
+
+\begin{tcolorbox}
+ Given a certain constraint on the perturbations and an MAP query, it is to determine whether or not the perturbed values may lead to a different decision about the MAP query.
+\end{tcolorbox}
+
+The following is an example from \cite{NIPS2014_09662890}. 
+
+\begin{example}
+Consider a simple two-node graphical model $G=(\{X_1,X_2\}, \{X_1 \rightarrow X_2\}, P)$, where $P(X_1=1)=0.45$ and $P(X_2=1|X_1=1)=0.2$ and $P(X_2=1|X_1=0)=0.9$. We have that 
+\begin{equation}
+MAP(G) = (X_1=1, X_2=0)
+\end{equation}
+
+Now, if consider the following perturbation constraint
+\begin{equation}
+    |P(X_1=1)-0.45| \leq 0.06
+\end{equation}
+does the assignment $(X_1=1, X_2=0)$ continue to be the $MAP(G)$? 
+\end{example}
+
+

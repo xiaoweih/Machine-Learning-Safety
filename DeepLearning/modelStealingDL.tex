@@ -1,0 +1,62 @@
+
+
+%\newpage
+\section{Model Stealing}\label{sec:modelstealingDL}
+
+As described in Section~\ref{sec:modelstealingdefinition}, one of the typical model stealing attacks is to construct another model $f_{surrogate}$ that is \emph{functionally equivalent} to the victim model $f_{victim}$. %Unlike the setting in Section~\ref{sec:modelstealinglinearregression} where we require that the parameters in $f'$ are as close as those in $f$, we expect the  
+%
+We assume the black-box knowledge to the victim model, which is realistic for MLaaS applications. Specifically, for a given instance, only the output probability vector is available, or more restrictively, only the predictive label is available.   
+%
+
+
+For an attack, most existing methods take three steps to construct $f_{surrogate}$: \begin{enumerate}
+    \item First, we build an architecture, and train an initial model $f_{surrogate}$ from easily accessible data such as randomly sampled data or public data. 
+    \item Second, we synthesise further instances $\textbf{X}_{syn}$ that are on the data distribution of the victim model. 
+    \item Third, we update the model $f_{surrogate}$ with the new training instances $\textbf{X}_{syn}$. 
+\end{enumerate}
+Moreover, considering that a single execution of the above steps might not achieve the best result, it is often that the last two steps are repeated until a pre-specified termination condition is satisfied. 
+
+In the following, we first present a simple iterative algorithm, and then discuss alternative implementations to the individual steps. 
+
+\subsection*{An Iterative Algorithm}
+
+In this section, we suggest a simple, iterative algorithm that learns the model $f_{surrogate}$ gradually until convergence. The algorithm is presented in Algorithm~\ref{alg:modelstealingalgorithm}. We take the cross-entropy loss, $\mathcal{L}_{CE}$, as the training loss, but the algorithm can be extended to work with other loss functions. 
+
+\begin{algorithm}[!htbp]
+\SetAlgoLined
+randomly sample a dataset $\textbf{X}_{syn}$ \\
+$f_{surrogate} \leftarrow \displaystyle \argmin_{f} \sum_{\textbf{x}\in \textbf{X}_{syn}} \mathcal{L}_{CE}(f(\textbf{x}),f_{victim}(\textbf{x}))$\\
+\While{
+ $\displaystyle \frac{1}{|\textbf{X}_{syn}|}\sum_{\textbf{x}\in \textbf{X}_{syn}} \mathcal{L}_{CE}(f_{surrogate}(\textbf{x}),f_{victim}(\textbf{x})) \geq  \epsilon$ 
+}{
+$i \leftarrow 0$\\
+$\textbf{X}_{syn}=\emptyset$ \\
+\Repeat{i>n}{
+sample a vector $\textbf{y}$ as the output prediction of a candidate input \\
+$\displaystyle \textbf{x} \leftarrow \argmin_{\textbf{x}} \mathcal{L}_{CE}(f_{surrogate}(\textbf{x}),\textbf{y})$\\
+$\textbf{X}_{syn} \leftarrow \textbf{X}_{syn} \cup \{\textbf{x}\}$\\
+$i \leftarrow i + 1$ \\
+}
+$f_{surrogate} \leftarrow \displaystyle \argmin_{f} \sum_{\textbf{x}\in \textbf{X}_{syn}} \mathcal{L}_{CE}(f(\textbf{x}),f_{victim}(\textbf{x}))$\\
+}
+\Return $f_{surrogate}$
+ \caption{$\functionname{ModelStealingAttack}(f_{victim},\epsilon,n)$, where $f_{victim}$ is the victim model that the user can access/query,  $\epsilon>0$ is a threshold that will be used to determine the convergence, and $n$ is the number of samples in the synthesised dataset. }
+ \label{alg:modelstealingalgorithm}
+\end{algorithm}
+
+The algorithm proceeds by first randomly selecting a synthetic dataset $\textbf{X}_{syn}$ (Line 1) to train a surrogate model $f_{surrogate}$ (Line 2). Then, these two objects, $\textbf{X}_{syn}$ and $f_{surrogate}$,  are iteratively updated until the difference between $f_{surrogate}$ and $f_{victim}$ is smaller than the threshold $\epsilon$ (Line 3). The iterative update is conducted by synthesising samples one by one for $\textbf{X}_{syn}$ (Line 6-11). For every sample, its synthesis process proceeds by first randomly sampling a label (represented as a vector of probability values $\textbf{y}$) (Line 7), and then according to the label $\textbf{y}$ finding an instance $\textbf{x}$ with the minimum loss on the  surrogate model $f_{surrogate}$ (Line 8). 
+
+\subsection*{Initiating Surrogate Model}
+
+The initial training data can be, as in Algorithm~\ref{alg:modelstealingalgorithm}, a set of instances randomly sampled from the victim model. Besides, for MLaaS, it is often useful to consider public datasets such as in \cite{DBLP:conf/cvpr/OrekondySF19,DBLP:conf/aaai/PalGSKSG20}. 
+For the initial model, it can start from a self-constructed architecture with randomised weights, such as in \cite{practical-black-box}, but can also start from pre-trained models from model zoos, such as Caffe Model Zoo \cite{jia2014caffe}. 
+
+\subsection*{Synthesising Further Instances}
+
+Usually, the training dataset for the initial surrogate model is much smaller than the victim model's training dataset, and for this reason, the initial model is not close enough to the victim model. Therefore, it is desirable to actively synthesise more instances for the update of the model. There are different approaches on how to get the new instances, including from public dataset \cite{DBLP:conf/cvpr/OrekondySF19,DBLP:conf/aaai/PalGSKSG20}, from adversarial examples \cite{practical-black-box,DBLP:conf/ndss/YuYZTHJ20}, and from data distribution of the victim model \cite{DBLP:conf/ijcai/GongCYMW21}. 
+
+
+\subsection*{Updating Surrogate Model}
+
+The update can be done by minimising the difference between $f_{surrogate}$ and $f_{victim}$ over the newly synthesised data instances, as shown in Line 12 of Algorithm~\ref{alg:modelstealingalgorithm}. We can also use a similar condition as the termination condition of the iterative process, as shown in Line 3 of Algorithm~\ref{alg:modelstealingalgorithm}. 
+

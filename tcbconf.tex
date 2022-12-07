@@ -1,0 +1,40 @@
+% -*- coding: utf-8; mode: latex -*-
+% Definitions for warnings & note boxes:
+\tcbuselibrary{skins}
+\tcbuselibrary{breakable}
+
+\tcbset{%
+  textmarker/.style={%almost straight from tcolorbox's manual
+    breakable,
+    oversize,
+    parbox=false,
+    boxrule = 0mm,
+    leftrule = 1mm,
+    rightrule = 1mm,
+    boxsep = 0mm,
+    arc = 0mm,
+    outer arc = 0mm,
+    left = 2mm,
+    right = 2mm,
+    top = 1mm,
+    bottom = 1mm,
+  }%
+}
+
+\newtcolorbox{warn}{%
+  textmarker,
+  colback = yellow!5!white,
+  colframe = yellow%
+}
+
+\newtcolorbox{logbox}{%
+  textmarker,
+  colback = shback!66!white,
+  colframe = shframe!66!white,
+  leftrule = 1pt,
+  rightrule = 1pt,
+}
+
+% Local variables:
+% TeX-master: "main"
+% End:

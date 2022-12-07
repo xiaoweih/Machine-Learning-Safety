@@ -1,0 +1,216 @@
+%\newpage
+\section{Uncertainty Estimation}\label{sec:uncertaintyEstimationDeepLearning}
+
+A neural network $f$ can be seen as a probabilistic classifier because, for a classification task, given an input $\textbf{x}$, it outputs a probabilistic distribution $f(\textbf{x})$. That is, aleatoric uncertainty is considered. However, as suggested in Section~\ref{sec:uncertainty}, due to the existence of other uncertainties, a single probabilistic distribution is insufficient, in particular, we are not sure whether the hypothesis class (i.e., model construction) is correct and whether the training achieves the global optimal. 
+%It is therefore useful to estimate the confidence of such probabilities. 
+
+\subsection{Estimating Total Uncertainty}
+
+For the epistemic uncertainty, we focus on   approximation uncertainty, and assume that the model uncertainty is reduced because over-parameterised neural networks have the capacity to model any complex function. The approximation uncertainty is mainly from  the weight $\textbf{W}$. To capture this uncertainty, Bayesian neural network has been proposed. In a Bayesian neural network, every weight is represented by a probability distribution rather than a real number. Therefore, the learning of a Bayesian neural network is to compute a posterior distribution $P(\textbf{W}~|~D_{train})$, and the predictive probability of input $\textbf{x}$ is to compute 
+\begin{equation}\label{equ:predictiveprobabilitybayesian}
+    P(y~|~\textbf{x}, D_{train}) \defequal \int P(y~|~\textbf{x},\textbf{W}) P(\textbf{W}~|~D_{train})d\textbf{W}
+\end{equation}
+While the posterior distribution $P(\textbf{W}~|~D_{train})$ cannot be obtained in an analytical way,  it can be estimated with variational approaches, by e.g., assuming a variational distribution $q$ with parameter $\theta$ and then minimising the KL divergence between $q$ and $P(\textbf{W}~|~D_{train})$ as we will discuss in Section~\ref{sec:VIestimation}. We will discuss in Section~\ref{sec:estimationgposteirordistribution} a set of methods on how to estimate posterior distribution. We remark that, with the method suggested in Equation (\ref{equ:predictiveprobabilitybayesian}), the obtained uncertainty of the predictive probability, i.e., the uncertainty of $P(y~|~\textbf{x}, D_{train}) $,  is the total uncertainty, including both aleatoric and epistemic uncertainties. 
+
+For the classification task, $P(y|\textbf{x},\textbf{W})$ can be the Softmax probability (or Softmax probability calibrated with techniques such as temperature scaling). Based on this and $q$, $P(y|\textbf{x},\textbf{W}) P(\textbf{W}|D_{train})$ can be seen as re-weighting $p_\theta$ with Softmax probability. 
+Once having the distribution $P(y|\textbf{x}, D_{train}) $, its total uncertainty can be quantified with common metrics such as entropy. For the regression task, $P(y|\textbf{x},\textbf{W})$ can be predicted with the method to be discussed in Section~\ref{sec:predictingAleatoric}, and in the end, the total uncertainty can be quantified with the variance of $P(y|\textbf{x}, D_{train})$. 
+
+\subsection{Separating Aleatoric and Epistemic Uncertainties}
+
+It is also possible to separate aleatoric and epistemic uncertainties, by taking an information-theoretical view. For example, we may use the entropy of the predictive posterior distribution
+\begin{equation}
+    H[P(y~|~\textbf{x})] \defequal -\sum_{y\in C} P(y|\textbf{x})\log_2P(y|\textbf{x})
+\end{equation}
+to express the total uncertainty, and 
+\begin{equation}\label{equ:epistemicuncertaintyseparatation}
+\begin{array}{rl}
+     & \textbf{E}_{P(\textbf{W}|D_{train})}  H[P(y|\textbf{W}, \textbf{x})] \\
+   =  & - \displaystyle \int P(\textbf{W}|D_{train})(\sum_{y\in C} P(y|\textbf{W},\textbf{x})\log_2P(y|\textbf{W},\textbf{x})) d\textbf{W}
+\end{array}
+\end{equation}
+to express the aleatoric uncertainty. Based on them, the epistemic uncertainty is the difference between them, i.e., 
+\begin{equation}
+    H[P(y~|~\textbf{x})] - \textbf{E}_{P(\textbf{W}|D_{train})}  H[P(y|\textbf{W}, \textbf{x})]
+\end{equation}
+which essentially is the mutual information between $y$ and $\textbf{W}$ when observing the input instance $\textbf{x}$. 
+Intuitively, Equation (\ref{equ:epistemicuncertaintyseparatation}) utilises the observation that, once fixing the weight and considering $P(y~|~\textbf{W},\textbf{x})$, the epistemic uncertainty is removed from $P(y~|~\textbf{x})$. 
+
+In practice, for the computation of aleatoric uncertainty, we need to estimate the posterior distribution $P(\textbf{W}|D_{train})$, and for the computation of epistemic uncertainty, we need to estimate the mutual information between $y$ and $\textbf{W}$ for instance $\textbf{x}$. 
+
+\subsection{Estimating Posterior Distribution}\label{sec:estimationgposteirordistribution}
+
+The above estimations rely on the estimation of posterior distribution $P(W~|~D_{train})$. There are two popular methods to estimate the posterior distribution, one is the sampling method, and the other is the Laplace approximation~\cite{botev2017practical,ritter2018scalable} of neural networks. In the following, we will sketch these two methods.   
+
+
+
+
+
+\subsection*{Monte Carlo Sampling}
+
+The sharpness-like method~\cite{jiang2019fantastic,keskar2016large} can be used to get a set of weight samples drawn from $(\mathbf{W}+U)$ such that $|\mathcal{L}(f_{\mathbf{W}+\mathbf{U}})-\mathcal{L}(f_{\mathbf{W}})|\le \epsilon$, where $U \sim \mathcal{N}(0, \sigma_U^2 I)$ is a multivariate random variable obeys zero mean Gaussian.
+Then, we can estimate $P(\textbf{W}~|~D_{train})$ through these samples.   
+
+Other more advanced sampling methods, such as Markov Chain Monte Carlo and Monte Carlo (MC) dropout, can also be considered. 
+
+
+\subsection*{Variational Inference}\label{sec:VIestimation}
+
+The variational inference is to cast the computation of the distribution $P(\textbf{W}~|~D_{train})$ as an optimisation problem. It assumes a class of tractable distributions $\mathcal{Q}$ and intends to finds a $q(\textbf{W})\in \mathcal{Q}$ that is closest to $P(\textbf{W}~|~D_{train})$. Apparently, once we have the distribution $q$, we can use it for any computation that involves $P(\textbf{W}~|~D_{train})$. 
+
+Let 
+\begin{equation}
+\begin{array}{rl}
+    & D_{KL}(q(\textbf{W})||P(\textbf{W}~|~D_{train})) \\
+    = & \displaystyle\int  q(\textbf{W}) \log{\frac{q(\textbf{W})}{P(\textbf{W}~|~D_{train})}} d\textbf{W} \\
+    = & \displaystyle \mathbb{E}_{q(\textbf{W})} (\log{\frac{q(\textbf{W})}{P(\textbf{W}~|~D_{train})}})\\
+    = & \displaystyle \mathbb{E}_{q(\textbf{W})} (\log{\frac{q(\textbf{W})}{P(D_{train}~|~\textbf{W})P(\textbf{W})}P(D_{train}}))\\
+    = & \displaystyle \mathbb{E}_{q(\textbf{W})} (\log{\frac{q(\textbf{W})}{P(D_{train}~|~\textbf{W})P(\textbf{W})})+ \log P(D_{train}})\\
+    = & \displaystyle D_{KL}(q(\textbf{W})||P(\textbf{W})) - \mathbb{E}_{q(\textbf{W})} (\log{P(D_{train}~|~\textbf{W})})+ \log P(D_{train})\\
+\end{array}
+\end{equation}
+To minimise this, we can minimise the negative log evidence lower bound 
+\begin{equation}
+    \begin{array}{rl}
+        \mathcal{L}_{VI} =  & D_{KL}(q(\textbf{W})||P(\textbf{W})) - \mathbb{E}_{q(\textbf{W})} (\log{P(D_{train}~|~\textbf{W})}) \\
+    \end{array}
+\end{equation}
+where $D_{KL}(q(\textbf{W})||P(\textbf{W}))$ is the KL divergence between the variational distribution $q(\textbf{W})$ and the known prior $P(\textbf{W})$. The expectation value $\mathbb{E}_{q(\textbf{W})} (\log{P(D_{train}~|~\textbf{W})}) $ can be approximated with Monte Carlo integration. Therefore, the optimisation 
+\begin{equation}
+    \hat{q}(\textbf{W}) \defequal \argmin_{q(\textbf{W})\in \mathcal{Q}}  \mathcal{L}_{VI}
+\end{equation}
+can be conducted by iteratively improving a candidate $q(\textbf{W})$ until convergence. 
+
+\subsection*{Laplace Approximation} 
+
+Laplace approximation has been used in posterior estimation in Bayesian inference \cite{bishop2006pattern,ritter2018scalable}. It aims to approximate the posterior distribution 
+$P(W | D_{train})$ by a Gaussian distribution, based on the second-order Taylor approximation of the $\ln$ posterior around its maximum-a-posteriori (MAP) estimate.
+Specifically, for layer $l$ and given weights with an MAP estimate $\mathbf{W}_l^*$ on $D_{train}$, we have
+\begin{equation}
+\begin{aligned} \label{eq:laplace-approx}
+   \ln P(W_l|D_{train}) \approx & \ln P\Big(\mathbf{W}_l^*|D_{train}\Big)-\frac{1}{2}\Big(W_l-\mathbf{W}_l^*\Big)^T\Sigma_{l} \Big(W_l-\mathbf{W}_l^*\Big),
+\end{aligned}
+\end{equation}
+where $$\Sigma_{l}=\mathbb{E}_{\mathbf{x}}\Big[\frac{\partial^2 \mathcal{L}(f_{\mathbf{W}}(\mathbf{x}))}{\partial \mathbf{W}_l \partial \mathbf{W}_l}\Big]^{-1}$$ is the expectation of the Hessian matrix over input data sample $\mathbf{x}$.
+
+It is worth noting that the gradient is zero around the MAP estimate $W^*$, so  the first-order Taylor polynomial is inexistent. Taking a closer look at Equation~\ref{eq:laplace-approx}, one can find that its right hand side is exactly the logarithm of the probability density function of a  Gaussian distributed multivariate random variable with mean ${\mathbf{W}_l^*}$ and covariance ${\Sigma_{l}}$, i.e., \begin{equation}W_l \sim \mathcal{N}(\mathbf{W}_l^*,\Sigma_{l})
+\end{equation}
+where $\Sigma_{l}$  can be viewed as the covariance matrix of $W_l$. 
+
+Laplace approximation suggests that it is possible to estimate $\Sigma_{l}$ through the inverse of the Hessian matrix.
+Recently, \cite{botev2017practical,ritter2018scalable} have leveraged insights from second-order optimisation for neural networks to construct a Kronecker factored Laplace approximation.
+Differently from the classical second-order methods~\cite{battiti1992first,shepherd2012second}, which suffer from high computational costs for deep neural networks, it takes advantage of the fact that Hessian matrices at the $l$-th layer can be Kronecker factored as explained in \cite{martens2015optimizing,botev2017practical}.                           
+That is,
+\begin{equation} \label{eq:hessian-decompose}
+\begin{aligned}
+    \frac{\partial^2 \mathcal{L}(f_{\mathbf{W}}(\mathbf{x}))}{\partial \mathbf{W}_l \partial \mathbf{W}_l}=\underbrace{a_{l-1}a_{l-1}^T}_{\mathcal{A}_{l-1}} \otimes \underbrace{\frac{\partial^2 \mathcal{L}(f_{\mathbf{W}}(\mathbf{x}))}{\partial h_{l}\partial h_{l}}}_{\mathcal{H}_{l}}=\mathcal{A}_{l-1} \otimes \mathcal{H}_{l},
+\end{aligned}
+\end{equation}
+where $h$ and $a$ are the latent representation before and after the activation function, $\mathcal{A}_{l-1} \in \mathbb{R}^{N_{l-1} \times N_{l-1}}$ indicates the subspace spanned by the post-activation of the previous layer, and $\mathcal{H}_{l} \in \mathbb{R}^{N_{l} \times N_{l}}$ is the Hessian matrix of the loss with respect to the pre-activation of the current layer.
+
+
+
+
+
+
+
+
+
+
+\subsection{Predicting Aleatoric Uncertainty for Regression Task}\label{sec:predictingAleatoric}
+
+Aleatoric uncertainty can be further divided into homoscedastic uncertainty and heteroscedastic uncertainty, with the former being a constant without depending on the input data and the latter depending on the input data. Because heteroscedastic uncertainty is on input data, it can be predicted as a model output. This is particularly useful for regression task, which -- unlike the classification task as explained in Section~\ref{sec:uncertainty} -- does not have the softmax probability that can be interpreted as the aleatoric uncertainty. 
+
+Actually, for regression task, instead of having only one output value $\hat{y}$, we may have two output values $\hat{y}$ and $\sigma^2$, where $\hat{y}$ represents the mean and $\sigma^2$ represents the variance of the output. To enable the training, the loss function can be defined as 
+\begin{equation}
+    \mathcal{L} = \sum_{(\textbf{x},y)\in D_{train}}\frac{||y-\hat{y}||_2}{2\sigma^2} + \frac{1}{2}\log \sigma^2
+\end{equation}
+Intuitively, if the prediction is wrong, the loss function encourages to increase $\sigma^2$. On the other hand, if the prediction is close to the ground truth, the variance can be small. 
+
+
+\subsection{Measuring the Quality of Uncertainty Estimation} 
+
+It turns out that, while the estimation of the uncertainties is non-trivial, measuring the quality of an uncertainty estimation method or comparing the quality between two uncertainty estimation methods are harder, due to the fact that ground truth on the uncertainty is not available. However, the need for such quality measurement is compelling, because it has been known that wrongly predicted instances may be assigned with high confidence while correctly predicted ones may be assigned with low confidence.  In the following, we present several methods on measuring the quality of uncertainty estimation. Unfortunately, these methods provide indicative evidence to support refuting an uncertainty estimation, without theoretical guarantees. 
+
+\subsection{Confidence Calibration based Methods} 
+
+Confidence calibration requires that the confidence score approximates the predictive probability. 
+%For instance, in autonomous driving, human intervention is often not avail- able in a timely manner and the high-level planning module will need such calibrated confidence score of pedestrian de- tection for instant decision making. 
+%
+%First of all, it is often useful to understand if the class prediction of a model is overconfident or underconfident. 
+We use $\hat{Y}$ as a random variable to denote the predictive \emph{label} and $\hat{P}$ as another random variable to denote the \emph{confidence} of the prediction. A machine learning model is \emph{perfectly calibrated} if 
+\begin{equation}
+    P(\hat{Y}=y~|~\hat{P}=p) = p
+\end{equation}
+for all probability value $p\in[0,1]$ and all label $y\in C$. Intuitively, the right-hand-side denotes a confidence value since $\hat{P}=p$, and the left-hand-side denotes the accuracy of predicting a label $y$ given the confidence. For example, given 100 predictions, each with a confidence of 0.8, we expect that 80 should be correctly classified. The calibration error is the difference between the right-hand-side and the left-hand-side. Moreover, the model is overconfident if $P(\hat{Y}=y~|~\hat{P}=p) < p$, and under-confident if $P(\hat{Y}=y~|~\hat{P}=p) > p$. 
+
+\subsubsection*{Expected Calibration Error (ECE)}
+
+ECE discretises the probability interval into a fixed number $B$ of bins, and assigns predictive probabilities to the bin that contains it. The calibration error becomes the difference between the fraction of predictions in the bin that are correct (i.e., accuracy) and the mean of the probabilities in the bin (i.e., confidence). %Intuitively, the accuracy esti- mates $P(Y = y | \hat{p} = p)$, and the average confidence is a setting of $p$. 
+Specifically, ECE computes a weighted average of this error across bins, i.e., 
+\begin{equation}
+    ECE \defequal \sum_{b=1}^B \frac{n_b}{N}|acc(b) - conf(b)|
+\end{equation}
+where $n_b$ is the number of predictions in bin $b$, $N$ is the total number of data points, and $acc(b)$ and $conf(b)$ are the accuracy and confidence of bin $b$, respectively.
+
+ECE is more suitable for Binary classification and can be too coarse for multi-class classification. To this end, Static Calibration Error (SCE) is proposed as a simple extension of ECE to the multiclass setting. Formally, 
+\begin{equation}
+    SCE \defequal \frac{1}{|C|}\sum_{y\in C}\sum_{b=1}^B \frac{n_{by}}{N}|acc(b,y) - conf(b,y)|
+\end{equation}
+where $acc(b, y)$ and $conf(b, y)$ are the accuracy and confidence of bin $b$ for class label $y$, respectively, and $n_{bk}$ is the number of predictions in bin $b$ for class label $y$.
+
+
+We may also consider Adaptive Calibration Error (ACE) which redefines the bin intervals so that each bin contains an equal number of predictions.
+
+\subsubsection*{Maximum Calibration Error (MCE)}
+
+ECE considers the average quality. In high-risk applications where reliable confidence measures are necessary, we may wish to consider the worst-case
+deviation between confidence and accuracy.  Therefore, we define 
+\begin{equation}
+    MCE \defequal \displaystyle\max_{b\in \{1..B\}} |acc(b)-conf(b)|
+\end{equation}
+which finds the maximal deviation among all bins. 
+
+\subsection{Selective Prediction Method}
+
+Selective prediction requires that the confidence scores, which are obtained through uncertainty estimation methods, can be used together with the thresholds to enable the model to be abstained from making predictions on samples with low confidence scores to achieve higher accuracy on the remaining part \cite{DBLP:conf/iclr/HendrycksG17}. 
+%For instance, in automatic segmentation of medical images, it is desired that the machine segments the common and easy area of medical images and refers the area with unusual appearance to the radiologists to ensure an extremely high accuracy [38]. 
+That is, the confidence score is expected to be used for separating correct predictions and wrong predictions. 
+
+Given a threshold $t$ and a machine learning model, we may separate a dataset $D$ into 
+\begin{equation}
+\begin{array}{rl}
+    D_{yh} = & \{(\textbf{x},{f}(\textbf{x}))~|~ {f}_y(\textbf{x}) \geq t, (\textbf{x},y)\in D\} \\
+    D_{yl} = & \{(\textbf{x},{f}(\textbf{x}))~|~ {f}_y(\textbf{x}) < t, (\textbf{x},y)\in D\}
+\end{array}
+\end{equation}
+where we recall that ${f}(\textbf{x})$ is the predictive label with $f$ and ${f}_y(\textbf{x})$ is the probability value of classifying $\textbf{x}$ as $y$ with the model $f$. 
+Ideally, $D_{yl}$ contains all wrong predictions and $D_{yh}$ contains all correct predictions. Together with the dataset $D$ which contains the ground truth labels, we can compute the TP rate, FP rate, recall, and precision, as defined in Section~\ref{sec:confusionmatrix}, for any given threshold $t$. 
+%The confidence value $\hat{P}(\textbf{x})$ is used for separating correct predictions and wrong predictions, which is a binary classification problem. 
+Then, by adapting the threshold $t$, we may draw ROC curve and PR curve. Finally, we can measure the quality of uncertainty estimation with the metrics AUROC and AUPR, i.e., the area under ROC and PR curves. 
+
+However, it has been suggested in \cite{DBLP:conf/cvpr/DingLXS20} that AUPR and AUROC may not only fail to provide a fair quality measurement, but also implicitly encourage the bad practice of reducing model accuracy in designing uncertainty estimation methods. Another curve called Risk-Coverage (RC) curve is proposed. Formally, 
+\begin{equation}
+    coverage \defequal \frac{D_h}{D}
+\end{equation}
+denotes the percentage of the input processed by the model without human intervention, and 
+\begin{equation}
+    riks \defequal \mathcal{L}(f(D_h))
+\end{equation}
+denotes the level of risk of these model predictions, where $\mathcal{L}$ is a loss function. Then, we can draw a curve with the $coverage$ as the x-axis and the $risk$ as the y-axis, and use the area under the curve, or AURC, as the measurement. 
+
+
+
+\iffalse
+
+\subsection{Proper Scoring Rule}
+
+● Negative Log-Likelihood (NLL)
+
+Brier Score
+○ Quadratic penalty (bounded range [0,1] unlike log)
+
+\subsection*{Out of Distribution Inputs}
+
+This is intended to understand if the confidence in IID is greater than OOD. 
+
+\fi

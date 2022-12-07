@@ -1,0 +1,158 @@
+%\newpage
+\section{Structure Learning}
+
+There are mainly two approaches to acquire a graphical model. The first is through knowledge engineering, where the graphical model is constructed by hand with expert’s help. The second is through machine learning, by which  the graphical model is learned from a set of instances. 
+
+First of all, the following is the problem statement for structure learning: 
+\begin{tcolorbox}
+Assume dataset $D$ is generated i.i.d. from distribution $P^*(X)$, and $P^*(X)$ is induced by an underlying graph $G^*$. The goal is to construct a graphical model $G$ such that it is as close as possible to $G^*$. 
+\end{tcolorbox}
+
+Considering that there may be many I-maps for $P^*$ and we cannot distinguish them from $D$, we know that $G^*$ is not identifiable. Nevertheless, in most cases, it is sufficient to recover $G^*$'s equivalence class. 
+
+\subsection{Criteria of Structure Learning}
+
+While our goal is to recover $G^*$'s equivalence class, this goal is nontrivial. One of the key issues is that the data instances sampled from the distribution $P^*(X)$ may be noisy. Therefore, we need to make decisions about including edges we are less sure about. Actually, too few edges means the possibility of missing out on dependencies, and too many edges means the possibility of spurious dependencies. 
+
+\begin{example}
+In a coin tossing example, we have two coins $X$ and $Y$, who are tossed independently. Assume that they are tossed 100 times, with the statistics shown in Table~\ref{tab:cointossingstructurallearning}. 
+Are $X$ and $Y$ independent? 
+\begin{table}[!htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    $X$ & $Y$ & times \\
+    \hline
+    head  & head & 27 \\
+    head  & tail & 22 \\
+    tail  & head & 25 \\
+    tail  & head & 26 \\
+    \hline
+    \end{tabular}
+    \caption{A simple coin tossing example}
+    \label{tab:cointossingstructurallearning}
+\end{table}
+Actually, if we follow the exact computation, they are dependent. But we suspect that they should be independent, because the probability of getting exactly 25 in each category is small (approx. 1 in 1,000). 
+\end{example}
+
+Actually, in a conditional probability table, the number of entries grows exponentially with the of parent nodes. Therefore, the cost of adding a parent node can be very large. According to this, it is better to obtain a sparser, simpler structure.  
+Actually, we can sometimes learn a better model by learning a model with fewer edges even if it does not represent the true distribution.
+
+\subsection{Overview of Structure Learning Algorithms}
+
+Basically, there are two classes of structural learning algorithms: 
+\begin{itemize}
+\item Constraint-based algorithms
+\item Score-based algorithms 
+\end{itemize}
+
+Constraint-based algorithms are to find a graphical model whose implied independence constraints match those found in the data. On the other hand, score-based algorithms are to find a graphical model that can represent distributions that match the data (i.e., could have generated the data).
+
+In the following, we introduce two 
+%elements 
+different directions of structural learning, by  the consideration of learning local relations and global structure, respectively. 
+
+\subsection*{Local: Independence Tests}
+
+For testing the independence between variables, we need measures of ``deviance-from-independence'' and rules  for accepting/rejecting hypothesis of independence. 
+%
+For the measures, we may consider e.g., mutual Information (K-L divergence) between joint and product of marginals, by having 
+\begin{equation}\label{equ:miedges}
+    d_I(D) = \frac{1}{|D|}\sum_{x_i,x_j}P(x_i,x_j)\log \frac{P(x_i,x_j)}{P(x_i)P(x_j)}
+\end{equation}
+for any two variables $X_i$ and $X_j$. 
+Theoretically, $d_I(D)=0$ if $X_i$ and $X_j$ are independent, and $d_I(D)>0$ otherwise. In addition to $d_I(D)$, there may be other means to define the measures, such as Pearson’s Chi-squared test.  
+
+Based on the measure,  we can define the acceptance rule as
+\begin{equation}
+    R_{d,t}(D)=
+    \begin{cases}
+    \text{Accept} & d(D) \leq t \\
+    \text{Reject} & d(D) > t \\
+    \end{cases}
+\end{equation}
+where $t$ is a pre-specified threshold. We remark that false rejection probability due to choice of $t$ is its $p$-value (refer to hypothesis testing). Alternatively, we may take Chow-Liu algorithm to construct a tree-like graphical model as follows: 
+\begin{enumerate}
+    \item find maximum weight spanning tree based on the values we compute in Equation (\ref{equ:miedges}); there are existing algorithms for this purpose, such as the Kruskal’s algorithm and the Prim’s algorithm. 
+    \item pick a root node and assign edge directions.  
+\end{enumerate}
+
+\subsection*{Global: Structure Scoring}
+
+Similarly as the local case, we need measures to evaluate the goodness of a graphical model and rules for accepting/rejecting hypothesis of goodness. 
+%
+There are different ways to define measures, including 
+\begin{itemize}
+    \item Log-likelihood Score for G with $n$ variables 
+\begin{equation}
+    Score_L(G,D) = \sum_{D}\sum_{i=1}^n \log P(x_i|pa(x_i))
+\end{equation}
+which can be seen as the loss of using graph $G$ to predict $D$. 
+    \item Bayesian Score 
+\begin{equation}
+    Score_B(G,D) = \log P(D|G) + \log P(G)
+\end{equation}
+which, in addition to the log-likelihood score $\log P(D|G)$, it also consider the prior $P(G)$. 
+    \item Bayes score with penalty term 
+\begin{equation}
+    Score_{BIC}(G,D) = L(G, D)- \frac{\log |D|}{2}||G||
+\end{equation}
+where $L(G, D)$ is the loss of using $G$ to predict $D$, and  $||G||$ is the complexity of the graph $G$. 
+\end{itemize}
+
+
+%\subsection*{Model Search}
+
+Once defined the scores, the structure learning is to search for a graphical structure with the highest score. It is known that finding the optimal one among those structures with at most $k$ parents is NP-hard for $k>1$. To deal with the high complexity, there are multiple methods including e.g., 
+\begin{itemize}
+    \item Greedy search 
+    \item Greedy search with restarts
+    \item MCMC methods
+\end{itemize}
+For the greedy search, it repeatedly does the following: 
+\begin{enumerate}
+    \item score all possible single changes, and
+    \item select the best change to apply if there are any changes that lead to better performance than the existing structure.
+\end{enumerate}  
+
+
+\subsection{Practice}
+
+The following code uses the \textbf{pomegranate} package to automatically learn structures from a simple dataset. 
+
+\begin{lstlisting}[language=Python]
+from pomegranate import BayesianNetwork
+import seaborn, time, numpy, matplotlib
+seaborn.set_style('whitegrid')
+
+import pandas as pd
+X = pd.DataFrame({'1':[0,0,0,1,0], '2':[0,0,1,0,0], '3':[1,1,0,0,1], '4':[0,1,0,1,1]})
+X = X.to_numpy()
+
+tic = time.time()
+model = BayesianNetwork.from_samples(X) 
+t = time.time() - tic
+p = model.log_probability(X).sum()
+print("Greedy")
+print("Time (s): ", t)
+print("P(D|M): ", p)
+model.plot()
+
+tic = time.time()
+model = BayesianNetwork.from_samples(X, algorithm='exact-dp') 
+t = time.time() - tic
+p = model.log_probability(X).sum()
+print("exact-dp")
+print("Time (s): ", t)
+print("P(D|M): ", p)
+model.plot()
+
+tic = time.time()
+model = BayesianNetwork.from_samples(X, algorithm='exact') 
+t = time.time() - tic
+p = model.log_probability(X).sum()
+print("exact")
+print("Time (s): ", t)
+print("P(D|M): ", p)
+model.plot()
+\end{lstlisting}

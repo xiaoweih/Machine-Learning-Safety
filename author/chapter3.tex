@@ -1,0 +1,60 @@
+
+\chapter{Deep Learning}\label{chap:deep}\label{part:deep}
+%\noindent Use the template \emph{part.tex} together with the document class SVMono (monograph-type books) or SVMult (edited books) to style your part title page and, if desired, a short introductory text (maximum one page) on its verso page.
+
+This chapter is focused on a specific topic in modern machine learning, i.e., deep learning. First of all, we introduce a few fundamental aspects, including perceptron and why we need multi-layer structures, how the convolutional neural networks extract features layer by layer, the back-propagation learning algorithm, and the functional layers of convolutional neural networks. Then, we will focus on the safety and security vulnerabilities of deep learning, explaining uncertainty estimation, adversarial attack on the robustness, poisoning attack, model stealing, membership inference and model inversion. 
+%
+Unlike traditional machine learning models that we discussed in the previous chapters where the structure or the training algorithm of a machine learning model may be considered for the design of the attacks, most attacks  for deep learning do not consider the internal structure of a deep learning model, although the gradient may be used in some cases. These black-box or grey-box attacks suggest that many of the attack algorithms for deep learning may also be applicable to traditional machine learning models, which explains why we frequently refer to algorithms in the chapter when discussing safety threads for traditional machine learning models. 
+
+%Nevertheless,  algorithms in chapter are heuristic, i.e., they are able to discover the safety threads but cannot confirm the in-existence of them. 
+
+
+
+%\chapter{Safety of Deep Learning}\label{chap:deep}
+
+
+\input{DeepLearning/perceptron}
+
+
+\input{DeepLearning/functionalView}
+
+
+
+\input{DeepLearning/forward-backward}
+
+
+
+\input{DeepLearning/convolutional}
+
+\input{RegularisedTraining/regularisations}
+
+\input{DeepLearning/uncertaintyEstimation}
+
+\input{DeepLearning/adversarialExamples}
+
+
+\input{DeepLearning/dataPoisoningDL}
+
+\input{DeepLearning/modelStealingDL}
+
+\input{DeepLearning/membershipInferenceDL}
+
+\input{DeepLearning/modelInversionDL}
+
+%\input{DeepLearning/bibliographicNotes}
+
+%\noexercises{
+\input{simpleML/exercises}
+\input{DeepLearning/exercise}
+%}
+
+%\chapter{Loss Functions and Regularisation}
+
+%\input{RegularisedTraining/introduction}
+
+
+
+
+
+%\input{RegularisedTraining/adversarialTraining}
+

@@ -1,0 +1,141 @@
+\section{Robustness Enhancement through Min-Max Optimisation}\label{sec:advtrainingsection}
+
+
+
+Deep neural networks (DNNs) can be easily fooled to confidently make incorrect predictions by adding small and human-imperceptible perturbations to their input~\cite{DBLP:journals/corr/GoodfellowSS14,szegedy2013intriguing,wu2020skip}. The study of adversarial defences, aiming to ultimately eliminate adversarial threat~\cite{kurakin2016adversarial}, has brought about significant advances in the past few years, with various techniques developed, including input denoising~\cite{bai2019hilbert}, adversarial detection~\cite{ma2018characterizing}, gradient regularisation~\cite{tramer2017ensemble}, feature squeezing~\cite{xu2017feature}, defensive distillation~\cite{papernot2016distillation} and adversarial training~\cite{madry2017towards,papernot2016distillation}. Among various techniques, adversarial training is known to be the most effective one~\cite{athalye2018obfuscated}.
+
+Adversarial training
+considers adversarial examples during the training. Consider a training dataset $D_{train}=\{(\mathbf{x}_i,y_i)\}_{i=1}^m$ with $m \in \mathbb{N}$ samples drawn from a distribution $\mathcal{D}$, where $\mathbf{x}_i \in \mathbb{R}^d$ is an example in the $d$-dimensional input space and $y_i$ is its ground-truth label, adversarial training~\cite{madry2017towards} updates the minimisation objective of the  training scheme from the usual one as follows 
+\begin{equation}
+J=\mathop{\mathbb{E}}\limits_{(\mathbf{x},y)\sim \mathcal{D}}  \mathcal{L}(\mathbf{x};y;f_\theta)
+\label{eq0}
+\end{equation}
+to 
+\begin{equation}
+     J_{\mathrm{adv}}=\mathop{\mathbb{E}}\limits_{(\mathbf{x},y)\sim \mathcal{D}} \bigg[\max_{||\mathbf{x}'-\mathbf{x}||_p\le \epsilon} \mathcal{L}(\mathbf{x}';y;f_\theta)\bigg],
+\label{eq1}
+\end{equation}
+where $\mathbf{x}'$ is the adversarial example within the $\epsilon$-ball (bounded by an $\ell_p$-norm) centred at clean example $\mathbf{x}$, $f_\theta(\cdot)$ is the DNN with parameter $\theta$, and $\mathcal{L}(\cdot)$ is the standard classification loss (e.g., the cross-entropy loss). 
+Therefore, adversarial training is formulated as a min-max optimisation problem.
+
+
+
+%[Below are old Contents in the deep learning chapter, check to see if they are needed, or integrate with the above]
+
+On the opposite side of adversarial attacks~\cite{biggio2013evasion, szegedy2014intriguing}, researchers also show huge interest in designing various defence techniques, which are to either identify or reduce adversarial examples so that the decision of the DNN can be more robust. Until now, the developments of attack and defence techniques have been seen as an ``arm-race''. For example, most defences against attacks in the white-box setting, including~\cite{hendrycks2016early,meng2017magnet,metzen2017detecting,papernot2016distillation}, have been demonstrated to be vulnerable to e.g., iterative optimisation-based attacks~\cite{carlini2017adversarial,carlini2017magnet}.
+%Here we only cover a few works that are relevant to . 
+%review some notable works that are recently emerged.
+
+
+
+%\subsection{Training with Adversarial Examples}
+
+%\subsection{Label Smoothing}
+
+\subsection{Normal Adversarial Training}
+
+% Adversarial training proposed in \cite{FGSM} proceeds by training on adversarial examples until the model learns to classify them correctly.
+% %
+% Given a training dataset $D$ and a loss function $\mathcal{L}(\cdot)$, standard training chooses network weights $\theta$ as 
+
+Adversarial training is one of the most notable defence methods, which was first proposed by~\cite{DBLP:journals/corr/GoodfellowSS14}. It can improve the robustness of DNNs against adversarial attacks by retraining the model on adversarial examples. Its basic idea can be expressed as below:
+\begin{equation}
+\theta^* = \arg \min_\theta\; \mathop{\mathbb{E}}\limits_{(\mathbf{x},y)\sim \mathcal{D}} \; \mathcal{L}(\mathbf{x}; y; f_\theta).
+\end{equation}
+%where $f_\theta$ is a DNN parameterized by $\theta$, $\mathcal{L}(\cdot)$ is the loss function, $D$ is the training dataset.
+This is improved in \cite{madry2017towards} by assuming that all neighbours within the $\epsilon$-ball should have the same class label, i.e., local robustness. Technically, this is done by changing the optimisation problem by requiring that   
+%
+%adversarial training approach of \cite{madry2017towards} is, 
+for a given $\epsilon$-ball (represented as a $d$-Neighbourhood), to solve \begin{equation}
+\label{eq_advtrn}
+\theta^* = \arg \min_\theta\; \mathop{\mathbb{E}}\limits_{(\mathbf{x},y)\sim \mathcal{D}} \left[ \max_{||\mathbf{x}'-\mathbf{x}||_p\le \epsilon} \mathcal{L}(\mathbf{x}'; y; f_\theta) \right].
+\end{equation} 
+%Intuitively, it is to assume that all neighbours within the $\epsilon$-ball should have the same class label and should be considered during the training. 
+% An approximate algorithm is suggested to 
+% %approximately solve this formulation, the authors 
+% solve the inner maximization problem by generating adversarial examples using projected gradient descent (PGD).
+\iffalse
+%Adversarial training is an effective approach to improve the robustness of a deep learning model. 
+The general idea is to create and incorporate adversarial examples into the training process. Surely, given there are many different ways of generating adversarial examples and various ways of incorporating them into training, this general idea thus can be implemented in a variety of approaches. 
+%
+The following is a typical format on how to conduct adversarial training.  
+%
+\begin{equation}
+    \min_{\textbf{W}} \sum_{(\textbf{x},y)\in D} \max_{\textbf{\textdelta} \in \Delta(\textbf{x})} L(f_{\textbf{W}}(\textbf{x}+\textbf{\textdelta}),y)
+\end{equation}
+\fi
+%
+Intuitively, it is a min-max process, where each learning batch is conducted by first selecting the worst-case adversarial perturbation during the \emph{inner maximisation}, and then adapting weights to reduce the loss by the adversarial perturbation in \emph{outer minimisation}. \cite{madry2017towards} adopted Projected Gradient Descent (PGD) to approximately solve the inner maximisation problem.
+Please see the template code in Section~\ref{sec:competitionresilience} for the adversarial training. 
+
+% Aiming at defending iterative attacks, 
+% cascade adversarial machine learning \cite{na2017cascade} is proposed to generate adversarial examples at each mini-batch. Technically, it trains a first model, generates adversarial examples (with iterative attack methods) on that model, adds these to the training set, then trains a second model on the augmented dataset, and so on.
+Later on, to defeat the iterative attacks, \cite{na2017cascade} proposed to use a cascade adversarial method which can produce adversarial images in every mini-batch. Namely, at each batch, it performs a separate adversarial training by putting the adversarial images (produced in that batch) into the training dataset.
+%Additionally, the authors construct a ``unified embedding'' and enforce
+%that the clean and adversarial logits are close under some metric.
+Moreover,~\cite{tramer2017ensemble} introduces ensemble adversarial training, which augments training data with perturbations transferred from other models. 
+
+
+\subsection{State-of-the-art Adversarial Training Technology}
+The first category is to reduce Equation~\ref{eq_advtrn} to an equivalent, or approximate, expression, which includes measuring the distance between $\mathbf{x}$ and $\mathbf{x}'$.
+For example, ALP~\cite{engstrom2018evaluating,kannan2018adversarial} enforces the similarity between $f_\theta(\mathbf{x})$ and $f_\theta(\mathbf{x'})$, the logits activations on unperturbed and adversarial versions of the same input $\mathbf{x}$.
+MMA~\cite{ding2018mma} encourages every correctly classified instance $\mathbf{x}$ to leave a sufficiently large margin, i.e., the distance to the boundary, by maximising the size of the shortest successful perturbation. 
+MART~\cite{wang2019improving} observes the difference between misclassified and correctly classified examples in adversarial training, and suggests different loss functions for them. 
+TRADES~\cite{zhang2019theoretically} analyses the robustness error and the clean error, and shows an upper bound and lower bound on the gap between robust error and clean error, which motivates adversarial training networks to optimise with
+\begin{equation}
+\mathcal{L}(\mathbf{x}; y; f_\theta)+\mathrm{KL}\big(f_\theta (\mathbf{x})||f_\theta (\mathbf{x}')\big)/\lambda,
+\end{equation}
+where $\lambda$ is the hyper-parameter to control the trade-off between clean accuracy and robust accuracy. 
+It considers the $\mathrm{KL}$-divergence of the activations of the output layer, i.e., $\mathrm{KL}(f_\theta(\mathbf{x})||f_\theta(\mathbf{x}'))$, for every instance $\mathbf{x}$.
+The measurement over $\mathbf{x}$ and $\mathbf{x}'$ can be extended to consider a local distributional distance, i.e., the distance between the distributions within a norm ball of $\mathbf{x}$ and within a norm ball of $\mathbf{x}'$. 
+For example, \cite{Zheng_Chen_Ren_2019} forces the similarity between local distributions of an image and its adversarial example, \cite{SJ2017} uses Wasserstein distance to measure the similarity of local distributions, and  \cite{dong2020adversarial,NEURIPS2020_5de8a360,dong2020benchmarking,mao2019metric,pang2020bag} optimise over distributions over a set of adversarial perturbations for a single image.
+
+
+
+
+
+The second category is to pre-process the generated adversarial examples before training instead of directly using the adversarial examples generated by attack algorithms.
+Notable examples include label smoothing~\cite{chen2020robust,szegedy2016rethinking}, which, instead of considering the adversarial instances $(\mathbf{x}',y)$ for the ``hard'' label $y$, it consider $(\mathbf{x}',\mathbf{\tilde{y}})$, where $\mathbf{\tilde{y}}$ is a ``soft'' label represented as a weighted sum of the hard label and the uniform distribution. 
+This idea is further exploited in ~\cite{muller2019does}, which empirically studies how label smoothing works.
+Based on these, AVMixup~\cite{lee2020adversarial,zhang2020does} defines a  virtual sample in the adversarial direction and extends the training distribution with soft labels via linear interpolation of the virtual sample and the clean sample.
+Specifically, it optimises 
+\begin{equation}
+\mathcal{L}(\mathbf{\check x},\mathbf{\check y}, f_\theta),
+\end{equation}
+where $\mathbf{\check x}=\beta\mathbf{x}+(1-\beta)\gamma(\mathbf{x}'-\mathbf{x})$, $\mathbf{\check y}=\beta\phi(\mathbf{y},\lambda_1)+(1-\beta)\phi(\mathbf{y},\lambda_2)$, 
+$\beta$ is drawn from the Beta distribution for each single $\mathbf{x}_i$, $\gamma$ is the hyper-parameter to control the scale of adversarial virtual vector, $\textbf{y}$ is the one-hot vector of $y$,  $\phi(\cdot)$ is the label smoothing function~\cite{szegedy2016rethinking}, and $\lambda_1$ and $\lambda_2$ are hyper-parameters to control the smoothing degree. 
+Other than label smoothing, \cite{NEURIPS2019_d8700cbd} generates adversarial examples by perturbing the local neighbourhood structure in an unsupervised fashion.
+
+
+These two categories follow the min-max formalism and only adapt its components. AWP~\cite{wu2020adversarial} adapts the inner maximisation to take one additional maximisation to find a weight perturbation based on the generated adversarial examples. The outer minimisation is then based on the perturbed weights~\cite{devries2017improved} to minimise the loss induced by the adversarial examples.
+Specifically, it is to optimise the double-perturbation adversarial training problem
+\begin{equation}
+\label{eq_awp}
+    \max_{\vec{V}\in\mathcal{V}}\mathcal{L}( f_{\theta+\vec{V}}(\mathbf{x}') ),
+\end{equation}
+where $\mathcal{V}$ is a feasible region for the parameter perturbation~$\vec{V}$. 
+
+
+In addition, \cite{zhang2019theoretically} regularises the output of natural inputs and corresponding adversarial examples (generated by PGD attack) with the KL divergence. \cite{xie2019intriguing} explores the normalisation in adversarial training and studies the Mixture batch normalisation mechanism by using respective batch normalisation layers for natural data and adversarial examples. \cite{cui2021learnable} proposes the Learnable Boundary Guided Adversarial Training (LBGAT) method, to improve robustness without losing much natural accuracy. \cite{jin2022enhancing} regularises second-order statistics of weights to improve robustness with the theoretical support from PAC-Bayesian adversarial bound.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

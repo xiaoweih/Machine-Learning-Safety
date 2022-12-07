@@ -1,0 +1,83 @@
+\section{Optimised Model Construction and  Training}\label{sec:archNtraining}
+
+In this section, we focus on the feedforward neural networks. Once the training dataset is ready, the developer needs to construct a neural network, decide on the training hyper-parameters, and then apply optimisation algorithm to train the neural network. In the following, we start with an analytical analysis of them through a decomposition of the generalisation error (Section~\ref{sec:generalisationerror}). 
+
+We write $G^{0-1}_{f}=GE(f,D_{train},D_{test})$ for the 0-1 generalisation error, and $\networks$ for the set of possible neural networks. Then, $G^{0-1}_{f}$ can be decomposed as follows: 
+
+\begin{equation}
+\label{eq_decomp_ge}
+G^{0-1}_f =
+\underbrace{G^{0-1}_{f} -\inf_{f \in \networks}G^{0-1}_f}_\text{Estimation error of $f$}
++
+\underbrace{\inf_{f \in \networks}G^{0-1}_f-G^{0-1,*}_{D_{train}}}_\text{Approximation error of $\networks$}
++\underbrace{G^{0-1,*}_{D_{train}}}_\text{Bayes error}
+\end{equation}
+where $G^{0-1,*}_{D_{train}}$ is the 0-1 generalisation error of the Optimal Bayes classifier. The \textit{Bayes error} is the lowest and irreducible error over all possible classifiers for the given classification problem \cite{fukunaga_introduction_2013}. It is non-zero if the true labels are not deterministic (e.g., an image being labelled as $y_1$ by one person but as $y_2$ by others), thus intuitively it captures the uncertainties in the dataset $D_{train}$ and the true distribution $\mathcal{D}$ when aiming to solve a real-world problem with machine learning. 
+%We remark that, The assurance of data in Section~\ref{sec:datapreparation} can help alleviate this error, but cannot completely reduce it. 
+%
+%We estimate 
+%this error
+%(implicitly) 
+%it 
+%at the \textbf{initiation} and \textbf{data collection} stages in activities like: necessity consideration and dataset preparation etc.
+%
+%
+The \textit{approximation error of $\networks$} measures how far the best classifier in $\networks$ is from the overall optimal classifier, after isolating the Bayes error. The set $\networks$ is determined by the architecture of the machine learning model, thus lifecycle activities at the \textbf{model construction} stage are used to minimise this error.
+%, essentially.
+Finally, the \textit{estimation error of $f$} measures how far the learned classifier $f$
+is from the best classifier in $\networks$. Lifecycle activities at the \textbf{model training} stage 
+%after the DNN being constructed 
+essentially aim to reduce this error.
+%, i.e., 
+%performing
+%doing
+%optimisations 
+%in 
+%of 
+%the set $\networks$.
+
+Both the approximation and estimation errors are reducible. The \emph{ultimate goal} of all lifecycle activities is to reduce the two errors to 0, especially for safety-critical systems. This is analogous to the ``possible perfection'' notion of traditional software as pointed to by Rushby and Littlewood \cite{littlewood_reasoning_2012,rushby_software_2009}. That is, assurance activities, e.g., performed in support of DO-178C, can be best understood as developing evidence of possible perfection.
+%-- a confidence in $\mathit{pfd}=0$. 
+Similarly, for safety critical machine learning model, we believe its lifecycle activities should be considered as aiming
+to train a ``possibly perfect'' model in terms of the two \textit{reducible} errors. Thus, we may have some confidence that the two errors are both 0 (equivalently, a prior confidence in the \textit{irreducible} Bayes error since the other two are 0), which indeed is supported by on-going research into 
+finding globally optimised DNNs \cite{du_gradient_2018}. 
+%Meanwhile, on the \textbf{trained model}, V\&V also provides prior knowledge as shown in Example~\ref{example_robustness} below, and \textbf{online monitoring} continuously validates the assumptions for the prior knowledge being obtained.
+
+
+
+
+\subsection*{Neural Architecture Search}
+
+While it is often regarded as dark-art for the  model construction and training because they are usually dependent on the experience of the developer, it is not hard from the above discussion that they can be treated as an optimisation problem to reduce the approximation and estimation errors. 
+%
+Towards this, neural architecture search \cite{DBLP:journals/corr/ZophL16} has been recently discussed through e.g., 
+reinforcement learning to automatically generate high-performing neural network architectures for a given learning task. 
+%The learning agent is trained to sequentially choose CNN layers using Q-learning with an $\epsilon$-greedy exploration strategy and experience replay. 
+The reinforcement learning agent explores a large but finite space of possible architectures and iteratively discovers designs with improved performance on the learning task. 
+
+
+\subsection*{Best Practice} 
+
+Neural architecture search requires significant computational resources so may not be applicable to all developments. An alternative way is to follow the best practice in machine learning development, which includes the following steps: 
+\begin{enumerate}
+    \item Start with a simple model with limited complexity (e.g., small number of features and restricted model capacity). Repeatedly do the following: 
+    \begin{enumerate}
+        \item tune the hyper-parameters to train a model, and 
+        \item apply debugging tools (e.g., verification and validation tools for safety properties, and the evaluation methods as introduced in Chapter~\ref{sec:usualevaluation}) to understand the performance, 
+    \end{enumerate}  
+    until finding a valid model. Take this model as a baseline model. 
+    \item Repeatedly do the following: 
+    \begin{enumerate}
+        \item add complexity (by e.g., increasing the number of features, and increasing model capacity) to a baseline model, and 
+        \item Repeat step 1a and 1b until obtaining a new trained model that performs better than the baseline model. We need to make sure than a more complex model should always perform better than a less complex model. Make the new model as a baseline model.     
+    \end{enumerate}
+    Note that, the above step 2 may lead to multiple baselines, and we always need to justify the benefit of added complexity with improved performance. 
+    \item Select a model from a set of baseline models according to the required, acceptable level of performance. 
+\end{enumerate}
+
+It is not hard to see that, the above best practice is also a controlled optimisation process to construct a more and more complex model by gradually increasing the model complexity. Different from the neural architecture search, this process has human in the loop, where the developer needs to design the added complexity and tune the hyper-parameters. 
+
+
+\subsection*{Expected Outcome}
+
+The outcome of the optimised model construction and training is a well trained model with minimum generalisation estimation and approximation error. The errors can be estimated in an empirical way with a test dataset or some more principled methods such as complexity measures~\cite{jin2020does}. In addition, as indicated in Part~\ref{chap:advtraining}, there might be other requirements, including the safety properties we discussed in Section~\ref{sec:defsafetyissues}, that are needed to be considered in model construction and training. Objective measurements are needed to determine if they are properly implemented.   

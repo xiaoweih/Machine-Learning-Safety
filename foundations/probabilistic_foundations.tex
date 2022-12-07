@@ -1,0 +1,233 @@
+%\newpage 
+\chapter{Probability Theory}
+
+\section{Random Variables}
+
+In most of our contexts, a random variable is a function that assigns probability values to each of an experiment's (or an event's) outcomes. Intuitively, a random variable has a probability distribution, which represents the likelihood that any of the possible values would occur.
+
+\begin{example}\label{example:foundationsgrades}
+We have a population of students, such that we want to reason about their grades. In this case, we have 
+\begin{itemize}
+    \item a random variable $Grade$, with the set of possible values $V(Grade)=\{ A, B, C \}$, and 
+    \item a function $P(Grade)$, which associates a probability with each outcome. 
+\end{itemize}
+\end{example}
+
+
+
+Given $P(X)$ is a probability distribution, we have 
+\begin{equation}
+    \sum_{x\in V(X)} P(x) = 1
+\end{equation}
+and we may call $P(X)$ the marginal distribution of $X$, as opposed to the joint and conditional distributions. We will explain these concepts in detail later.  
+
+A probability distribution $P(X)$ is a multi-nominal distribution if there are multiple values for the random variable $X$, i.e., $|V(X)|>1$. Moreover, if $V(X)=\{false,true\}$ then $P(X)$ is a Bernoulli distribution. Besides, $P(X)$ can be continuous, such that it may take on an uncountable set of values. 
+
+\begin{example}
+The $Grade$ random variable in Example~\ref{example:foundationsgrades} has three possible values and therefore it is associated with a multi-nominal distribution. Also, for a coin tossing example with a single coin that may be either head or tail, the random variable $Coin$ is associated with a Bernoulli distribution. Moreover, a real-valued random variable is continuous, even if it only takes values from a real interval. 
+\end{example}
+
+
+A random variable can also be multi-dimensional. 
+
+\begin{example}
+For the \textbf{iris} example as in Example~\ref{example:iris}, the data instance can be seen as a 4-dimensional continuous variable $X$, such that it has an underlying data distribution and the dataset is sampled from the data distribution. The label $Y$ can be seen as another random variable.    
+\end{example}
+
+%Such a distribution is also referred to as a multi-nomial distribution as there are multiple values for the random variable $X$. If 
+
+%Also, 
+
+\section{Joint and Conditional Distributions}
+
+A marginal probability is the probability of an event $X$ occurring, i.e., $P(X)$. It may be thought of as an unconditional probability, as it is not conditioned on any other event.
+
+\begin{example}
+Assume that we randomly draw a card from a standard deck of playing cards. Let $C$ be the random variable, representing the color of the card drawn. Then, the probability that the card drawn is red is $P(C = red) = 0.5$, or simply $P(red) = 0.5$ if the random variable $C$ is clear from the context.
+\end{example}
+
+\begin{example}
+Given a standard deck of playing cards, the probability that a card drawn is a 4 is $P(four)=1/13$.
+\end{example}
+%• Another example: 
+
+\subsection*{Joint probability $P(X,Y)$} 
+is the probability of event $X$ and event $Y$ occurring. It is a statistical measure that calculates the likelihood of two events occurring at the same time. %It is the probability of the intersection of two or more events. The probability of the intersection of $A$ and $B$ may be written $P(A \cap B)$.
+
+\begin{example}
+Given a standard deck of playing cards, the probability that a card is a four and red, i.e., $P(four, red) = 2/52=1/26$. Note: there are two red fours in a deck of 52, the 4 of hearts and the 4 of diamonds.
+\end{example}
+
+The joint probability can be generalised to work with more than two events. 
+
+
+\subsection*{Conditional probability $P(X|Y)$}
+ is the probability of event $X$ occurring, given that event $Y$ has already occurred.
+
+\begin{example}
+Given a standard deck of playing cards, if we know that you have drawn a red card, what is the probability that it is a four? The answer is  $P(four|red)=2/26=1/13$, i.e., out of the 26 red cards (given a red card), there are two fours, so $2/26=1/13$.
+\end{example}
+
+\section{Independence and Conditional Independence}\label{sec:indepandcondindep}
+
+Without loss of generality, we assume that for the remaining of this section, all random variables are Boolean. 
+Given two Boolean random variables $X$ and $Y$, we expect that, in general, $P(X|Y)$ is different from $P(X)$, i.e., the fact that $Y$ is true may  change our probability over $X$.  
+
+\subsection*{Independence}
+
+Sometimes an equality can occur, i.e, $P(X|Y)=P(X)$.  
+ i.e., learning that $Y$ occurs does not change our probability of $X$. In this case, we say event $X$ is independent of event $Y$, denoted as %
+ \begin{equation}
+     X \bot Y
+ \end{equation}
+%
+A distribution $P$ satisfies $X \bot Y$ if and only if $P(X,Y)=P(X)P(Y)$. %A more common situation is when two events are independent given an additional event 
+
+
+\begin{example}\label{example:independenceexample}
+Consider the joint probability table as shown in Table~\ref{tab:simpleJointProbability}. 
+\begin{table}[!htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+        X & Y & P(X,Y)  \\
+        \hline
+        $0$  &  $0$ & 0.08 \\
+        $0$  &  $1$ & 0.32 \\
+        $1$  &  $0$ & 0.12 \\
+        $1$  &  $1$ & 0.48 \\
+        \hline
+    \end{tabular}
+    \caption{A simple two variable joint distribution}
+    \label{tab:simpleJointProbability}
+\end{table}
+
+First of all, we note that 
+\begin{equation}
+    \begin{array}{lcl}
+        P(X=0) & = & 0.32+0.8 = 0.4 \\
+        P(X=1) & = & 0.6 \\
+        P(Y=0) & = & 0.08+0.12 = 0.2 \\
+        P(Y=1) & = & 0.8 \\
+    \end{array}
+\end{equation}
+Then, we notice that 
+\begin{equation}
+    \begin{array}{lclclcl}
+      0.08 & = &  P(X=0,Y=0) & = & P(X=0)*P(Y=0) & = & 0.4 * 0.2 \\
+      0.32 & = &  P(X=0,Y=1) & = & P(X=0)*P(Y=1) & = & 0.4 * 0.8 \\
+      0.12 & = &  P(X=1,Y=0) & = & P(X=1)*P(Y=0) & = & 0.6 * 0.2 \\
+      0.48 & = &  P(X=1,Y=1) & = & P(X=1)*P(Y=1) & = & 0.6 * 0.8 \\
+    \end{array}
+\end{equation}
+that is, 
+\begin{equation}
+    P(X,Y) = P(X) * P(Y)
+\end{equation}
+which suggests that $X$ and $Y$ are independent.
+\end{example}
+
+\begin{example}\label{example:noindependence}
+On the other hand, for the following Table~\ref{tab:simpleJointProbability2}, the two variables $X$ and $Y$ are not independent.  
+
+\begin{table}[!htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+        X & Y & P(X,Y)  \\
+        \hline
+        $0$  &  $0$ & 0.10 \\
+        $0$  &  $1$ & 0.16 \\
+        $1$  &  $0$ & 0.64 \\
+        $1$  &  $1$ & 0.10 \\
+        \hline
+    \end{tabular}
+    \caption{Another simple two variable joint distribution}
+    \label{tab:simpleJointProbability2}
+\end{table}
+\end{example}
+
+
+\subsection*{Conditional independence}
+
+
+While independence is a useful property, we do not often encounter two independent events.  
+A more common situation is when two events $X$ and $Y$ are independent given an additional event $Z$, denoted as 
+ \begin{equation}
+     X \bot Y | Z
+ \end{equation}
+A distribution $P$ satisfies $X \bot Y | Z$ if and only if $P(X,Y | Z)=P(X | Z)P(Y | Z)$. 
+
+Note that, similar calculation as in Examples~\ref{example:independenceexample} and \ref{example:noindependence} can be done to work with conditional independence, with the only changes on replacing the computation of marginal probabilities $P(X)$ and $P(Y)$ with the computation of conditional probabilities $P(X | Z)$ and $P(Y | Z)$.
+
+
+\section{Querying Joint Probability Distributions}
+
+A joint distribution $P(X_1,...,X_n)$ contains an exponential number $2^n$ of real probability values and it can be hard to make sense of them. It is desirable that we are able to infer useful information by making queries. 
+%
+In the following, we introduce a few categories of queries. 
+
+\subsection*{Probability queries} 
+
+are to compute distribution of a subset of random variables, given  evidence (i.e., the values) of another subset of random variables. Formally, it is to compute
+\begin{equation}
+    P(X_{i1},...,X_{ik}| X_{j1}=x_{j1},...,X_{jl}=x_{jl})
+\end{equation}
+where $x_{j1},...,x_{jl}$ are evidence for the random variables $X_{j1},...,X_{jl}$, respectively. Moreover, we have  $\{X_{i1},...,X_{ik}\}\cup \{X_{j1},...,X_{jl}\}\subseteq \{X_1,...,X_n\}$ and $\{X_{i1},...,X_{ik}\}\cap  \{X_{j1},...,X_{jl}\} = \emptyset$. 
+
+\subsection*{Maximum a posteriori (MAP) queries}
+
+In addition to probability queries which concern the (conditional) probability of the occurrence of events, we may be interested in MAP-style queries, which is to find a joint assignment to some subset of variables that has the highest probability. For simplicity, we let $\{X_1,...,X_k\}, \{X_{k+1},...,X_l\}, \{X_{l+1},...,X_n\}$ be three disjoint subsets of the random variables $\{X_1,...,X_n\}$. Then, the MAP query is of the form  
+\begin{equation}
+\begin{array}{rl}
+     &  MAP(X_1,...,X_k|X_{l+1},...,X_n) \\
+   =  & \displaystyle\argmax_{x_1,...,x_k} \sum_{x_{k+1},...,x_{l}}P(X_{1}=x_1,...,X_{l}=x_l| X_{l+1}=x_{l+1},...,X_{n}=x_{n})
+\end{array}
+\end{equation}
+Intuitively, we have the evidence for variables $\{X_{l+1},...,X_n\}$, and intend to find the joint assignment for $\{X_1,...,X_k\}$. Because we do not have information about $\{X_{k+1},...,X_l\}$, we marginalise them. 
+
+\begin{example}
+Consider a probability table for variable $X_1$ as in Table~\ref{tab:tableforx1}.  
+\begin{table}[!htbp]
+    \centering
+    \begin{tabular}{|c|c|}
+    \hline
+        $X_1 = 0$ & $X_1 = 1$ \\
+        \hline
+        0.4 & 0.6\\
+        \hline
+    \end{tabular}
+    \caption{Probability table for $X_1$}
+    \label{tab:tableforx1}
+\end{table}
+
+Then, we have $MAP(X_1)=1$. 
+\end{example}
+
+\begin{example}
+Consider a joint probability table for variables $X_1$ and $X_2$ as in Table~\ref{tab:tableforx1x2}. 
+\begin{table}[!htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+        $X_1$ & $X_2$ & $P(X_1,X_2)$ \\
+        \hline
+        0 & 0 & 0.04\\
+        0 & 1 & 0.36 \\
+        1 & 0 & 0.3 \\
+        1 & 1 & 0.3\\
+        \hline
+    \end{tabular}
+    \caption{Joint probability table for $X_1$ and $X_2$}
+    \label{tab:tableforx1x2}
+\end{table}
+
+Then, we have $MAP(X_2)=1$. 
+\end{example}
+
+%Maximum a posteriori probability 
+%Also called MPE (Most Probable Explanation) 
+%What is 
+%Marginal MAP Queries
+
+

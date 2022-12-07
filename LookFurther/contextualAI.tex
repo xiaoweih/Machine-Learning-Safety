@@ -1,0 +1,22 @@
+\subsection*{Contextualisation}\label{sec:contextualAI}
+
+
+
+
+Contextual AI is a collection of techniques aiming to embed human context into AI systems so as to enable their interaction with humans. First of all, context-awareness requires that the AI systems are able to ``see'' at the same level as a human does. Then, based on the \emph{human-level observation}, contextual AI is capable of analysing the cultural, historical, and situational aspects surrounding incoming data, and synthesising a context that makes the most sense to the humans. Such \emph{human-level reasoning} enables the contextual AI to have the sufficient understanding about the human’s environment, situation, and context. 
+It is based on this level of understanding that it is able to explain, reason, behave, and collaborate with the human. 
+%
+
+
+Unfortunately, neither the learning algorithms nor the analysis techniques naturally have human-level observation and reasoning. For example, for image classification task, both the deep learning algorithms and their analysis techniques are primarily based on pixels, while humans understand the images through high-level features. Typical ways of enhancing machine learning algorithms with contextualisation can be done through e.g., apply explainable AI techniques to obtain human-level observation, synthesise context into structures such as knowledge graph and Bayesian network, and then 
+conduct human-level reasoning (e.g., logic reasoning, commonsense reasoning, or probabilistic inference) over the synthesised structures. 
+
+
+Analysis techniques, such as verification and validation techniques, should also been lifted to human-level observation and reasoning. Actually, the consideration of pixel-level analysis techniques has led to the notorious scalability issues that verification techniques are only able to work with either small-size neural networks (as in Chapter~\ref{chap:MILP}) or limited number of input dimensions (as in Chapter~\ref{chap:reachabilityAnalysis}). Even for testing techniques, the scalability is also an issue when considering tighter coverage metrics such as MC/DC (Section~\ref{sec:test-criteria}). Therefore, the analysis techniques to support the reasoning on higher-level features are needed to not only make the analysis make sense to humans but also focus the limited analysis cost on the most important aspects. 
+
+Another perspective is on the risk of de-contextualisation in terms of the choice of models. Models originally used for one purpose may not be suitably re-used in a different context and for a different purpose. Validation activities are required to understand the impact of contextual changes on the safety. 
+
+\subsection*{Expected Outcome}
+
+The outcome of assured partnership is a machine learning model that is able to perceive, reason, and behave at the same level as its human partners. The three perspectives discussed above (uncertainty estimation, explainability and interpretability, and contextualisation) are essential for this purpose. In addition to their respective evaluations in particular for the uncertainty estimation and explainability and interpretability, a holistic evaluation on the assured partnership, or more formally trust between humans and AI, should also be considered. The trust evaluation is needed to be supported by rigorous reasoning frameworks such as \cite{10.1145/3329123},  where the trust is quantitatively measured, and dynamically updated with the interactions, to enable verification techniques to be applied.
+Empirical experiments based on these theoretical frameworks should be conducted to validate the success of partnership. 

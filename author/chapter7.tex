@@ -1,0 +1,49 @@
+\input{LookFurther/ReinforcementLearning}
+
+\input{LookFurther/testing}
+
+\input{LookFurther/assurance}
+
+\chapter{Assurance of Machine Learning  Lifecycle}\label{chap:safetyassurance}
+
+Up to now, all the techniques discussed are working with subjects at certain stage of the machine learning development cycle. For example, verification techniques are working with trained models, and adversarial training is working with models when learning. However, to ensure the safety of critical systems, safety assurance is usually required to assure the  development lifecycle and demonstrate to others (such as third party clients and authorities) that the  system performs accordingly. 
+In general, safety assurance activities include  systematic processes for continuous monitoring and recording of the system's safety performance, as well as evaluation of the safety processes and practices. In terms of the machine learning systems, safety assurance activities are to monitor, evaluate, and enforce safety measures for their lifecycle. 
+%
+%This chapter will cover other safety related topics that have not been discussed before, and mainly focus on the safety assurance on the machine learning lifecycle.  
+Figure~\ref{fig:lifecyle} presents the four stages in machine learning cycle when considering their working in safety critical systems: data preparation, model construction and model training, verification and validation, and runtime enforcement.
+In this chapter, we will discuss some perspectives (e.g., good practice, safety measurement) for each lifecycle stage, as indicated in Figure~\ref{fig:lifecyle}. For example, for data preparation stage, we will present a workflow of good practice in preparing the training dataset, and discuss a measurement on determine its quality (i.e., the sufficiency). For runtime enforcement, we will discuss a few aspects that are essential to the safe deployment of the machine learning model in an environment, focusing on the partnership of AI and humans. We also discuss expected outcome of each stage. 
+
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/LookFurther/lifecycle.png}
+    \caption{Safety Assurance of Machine Learning Lifecycle}
+    \label{fig:lifecyle}
+\end{figure}
+
+
+
+\input{LookFurther/dataquality}
+
+\input{LookFurther/dataSufficiency}
+
+\input{LookFurther/architectureNtraining}
+
+\input{LookFurther/testSufficiency}
+
+\input{LookFurther/parntership}
+
+\input{LookFurther/uncertainty}
+
+\input{LookFurther/explainableAI}
+
+\input{LookFurther/contextualAI}
+
+
+\chapter{Probabilistic Graph Models for Feature Robustness}\label{chap:pgmfeature}
+
+\input{graphicalModels/introduction}
+
+\input{graphicalModels/PGM-for-DNN}
+
+\input{LookFurther/exercises}

@@ -1,0 +1,18 @@
+\begin{partbacktext}
+\part{Extended Safety Solutions}\label{chap:lookfurther}
+%\noindent Use the template \emph{part.tex} together with the document class SVMono (monograph-type books) or SVMult (edited books) to style your part title page and, if desired, a short introductory text (maximum one page) on its verso page.
+
+This part of the book will include several topics 
+that are closely related to the solutions to machine learning safety but have not been covered in the previous part. It includes the consideration of other deep learning models (including deep reinforcement learning) and other safety analysis techniques (including testing techniques, reliability assessment, and  assurance of lifecycle). These techniques should belong to the safety solutions, but unlike verification and enhancement in Part~\ref{chap:verification}, they are relatively new and we believe that additional efforts will be required before they become mature and are ``upgraded'' into safety solutions. 
+
+The first topic is to consider deep reinforcement learning (DRL), which has been applied as the control software for e.g., the motion planning of a mobile robot. We present several existing statistical evaluation methods that can roughly estimate the quality of a trained DRL policy. Then, we will consider probabilistic verification methods over an abstract model obtained from the example interactions of the DRL with the environment. The abstract model will vary according to different assumptions, e.g., whether the state-based robustness and/or whether the dynamics of robustness are considered. We also discuss sim-to-real challenge. 
+
+The second topic is about testing technique (or simulation-based verification) for neural networks, which has been widely discussed in the past years. Similar as software testing as opposed to software verification, testing technique for neural networks starts with the goal of striking a balance between the scalability and the cost for verification. In contrast to the exhaustiveness of verification, testing considers different definitions of coverage, based on which the test cases are generated. 
+
+The third topic is about reliability assessment, which aims to statistically evaluate high-level safety goals such as ``the perception module will run without any misclassification for the next 1000 input instances with  probability 99\%''. The estimation of high-level goals requires not only the statistical understanding of how the machine learning model is going to be used but also the support from safety verification or testing 
+%on e.g., the point-wise robustness as 
+as safety evidence.   
+
+Finally, we suggest that the safety assurance of a machine learning model requires the consideration of its entire lifecycle, which includes four stages: data collection \& preparation, model construction \& training, verification \& validation, and runtime enforcement. We discuss  several subtopics that may appear in the assurance of machine learning lifecycle, including the assurance of data, sufficiency of training data, the optimised model construction and training, the adequacy of verification and validation, and the assured partnership of AI and humans. 
+
+\end{partbacktext}

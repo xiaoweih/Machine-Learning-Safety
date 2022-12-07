@@ -1,0 +1,22 @@
+
+
+\section{Ground Truth and Underlying Data Distribution}
+
+Once a machine learning model is trained, it is desirable to understand if it performs well enough in terms of some pre-specified properties. These properties are defined according to the requirements specified by the designer or the user of the machine learning model. Therefore, they might be problem specific. Nevertheless, there are typical evaluation methods that are frequently adopted by machine learning practitioners and researchers. 
+%
+In the next two chapters (Chapter~\ref{sec:usualevaluation} and Chapter~\ref{sec:defsafetyissues}), we review a set of evaluation methods.   Before introducing concrete evaluation methods, we explain the ground truth of a learning problem and the underlying data distribution. Without loss of generality, in this chapter, we consider classification task.
+
+In principle, when dealing with a classification task where the data instances have $m$ real-valued features, a machine learning model $f$ is to approximate a target, ground truth function $h$. That is, the ultimate objective of an evaluation is to understand the gap between $f(\textbf{x})$ and $h(\textbf{x})$ for all legitimate instances $\textbf{x}\in \real^m$. Unfortunately, the input domain $\real^m$ is continuous and may contain an uncountable number of instances. It is unlikely that an evaluation method can exhaustively enumerate all possible instances. Therefore, an evaluation method may need to strike a balance between the exhaustiveness and the cost. 
+
+For a problem with $m$ features, we let $X_1,...,X_m$ be the $m$ random variables, each of which corresponds to one of the features. 
+Let 
+\begin{equation}
+    P_h(X_1,...,X_m)
+\end{equation}
+be the underlying data distribution of $h$, such that  each instance $\textbf{x}=(x_1,...,x_m)$ has a probability density $P_h(\textbf{x})$. We have that 
+\begin{equation}
+    \int_{\textbf{x}\in\real^m} P_h(\textbf{x}) = 1
+\end{equation}
+For a real world problem, $P_h(\cdot)$ may follow a highly non-linear distribution and it is possible that there are many $\textbf{x}\in\real^m$ that $P_h(\textbf{x})=0$.
+
+The datasets we are dealing with -- such as training, test, and validation datasets -- are all assumed to be obtained by sampling from this distribution. 
